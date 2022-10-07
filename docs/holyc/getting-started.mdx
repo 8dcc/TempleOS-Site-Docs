@@ -3,13 +3,13 @@ id: getting-started-hc
 title: Getting Started
 sidebar_position: 2
 ---
-<link rel="stylesheet" href="../../css/prism.css"/>
-# Getting Started with HolyC
-To start writing HolyC code in TempleOS, you can use the in-built text-editor to edit a file. To do so, enter the Ed() into
+
+# TEST
+
+This is a test page written in markdown. Below you can see complete syntax highlighting for HolyC on the web + internal function recgonition. Crazy huh?
 
 ```holyc
-U0 Main(){
-    U0 BottlesOfBeer (I64 initial=99) {
+U0 BottlesOfBeer (I64 initial=99) {
 	// This is made I64 rather than U64, because a U64 would overflow At the end of the loop, thus it would loop forever (i-- would be 0-1 so it overflows and is always  greater than or equal to 0).
 	I64 i = initial;
 
@@ -32,7 +32,7 @@ U0 Main(){
 			" of beer on the wall.\n";
 		}
 	}
-}
+    }
 
 // Calls the function, which goes to the default parameters
 BottlesOfBeer;
