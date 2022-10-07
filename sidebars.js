@@ -22,7 +22,8 @@ const sidebars = {
     
   ],
   holyc : [
-    "holyc/intro"
+    "holyc/intro",
+    "holyc/getting-started-hc"
   ]
 
 

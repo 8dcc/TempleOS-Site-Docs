@@ -1,3 +1,6 @@
+const holyc = require('./src/theme/holyc.js');
+
+
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
   title: "TempleOS Simplified",
@@ -26,6 +29,9 @@ module.exports = {
   themeConfig: {
     colorMode: {
       respectPrefersColorScheme: true,
+    },
+    prism: {
+      theme: holyc,
     },
     navbar: {
       title: "TempleDocs",
@@ -169,9 +175,6 @@ module.exports = {
 
     },
 
-    prism: {
-      
-    },
 
   },
 
