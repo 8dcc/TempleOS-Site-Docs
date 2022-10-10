@@ -15,15 +15,17 @@ const sidebars = {
       items: [
         "guide/installing/methods",
         "guide/installing/virtualized"
-      
+
       ],
     },
     "Keybinding"
-    
+
   ],
-  holyc : [
+  holyc: [
     "holyc/intro",
-    "holyc/getting-started-hc"
+    "holyc/getting-started-hc",
+    "holyc/printing",
+    "holyc/datastructs"
   ]
 
 
