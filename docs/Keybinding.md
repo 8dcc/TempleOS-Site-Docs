@@ -2,7 +2,7 @@
 id: Keybinding
 title: Keybinding
 ---
-<h1 align="center"> Keybinding ⌨️  </h1>
+# TempleOS Specific
 
 mod -> super (window key)
 

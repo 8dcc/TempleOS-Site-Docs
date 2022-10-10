@@ -10,6 +10,7 @@ import Banner from "../components/Banner";
 
 // Home page
 
+
 function Home() {
   return (
     <Layout description="">
