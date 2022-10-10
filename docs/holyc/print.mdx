@@ -18,6 +18,7 @@ The arguments are `1`,`2`, and `3` here and the format code is `d`(Integer decim
 There are various formatting codes for different types of data,to use a floating point number,use *n*
 ```holyc
 "Pi is %n\n",3.14;
+
 ```
 The basic formatting codes are:
 |Code| Meaning |Type |
@@ -33,6 +34,7 @@ The basic formatting codes are:
 |Q|Reverse quoted string|`U8*`|
 |Z|`DefineLst` entry(Takes 2 arguments)|`U8 *` and `I64`| 
 |z|Sub-entry of \0 terminated string(Takes 2 arguments)|`U8 *` and `I64`| 
+
 ## z/Z Formating
 `DefineLst`'s are things whose items are separated by `\0`s,they look like this:
 ```holyc
