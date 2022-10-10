@@ -26,7 +26,7 @@ var theme = {
     {
       types: ["builtin", "char", "constant"],
       style: {
-        color: "rgb(130, 170, 255)",
+        color: "rgb(207, 130, 255)",
       },
     },
     {
