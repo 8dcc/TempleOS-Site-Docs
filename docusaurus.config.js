@@ -28,7 +28,9 @@ module.exports = {
 
   themeConfig: {
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'dark',
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
     },
     prism: {
       theme: holyc,
@@ -39,7 +41,7 @@ module.exports = {
         alt: "HolyC Logo",
         src: "logos/HolyC.png",
       },
-      
+
       items: [
 
 
@@ -65,12 +67,12 @@ module.exports = {
           sidebarId: 'config'
         },
 
-        
+
 
         {
           href: "https://github.com/templeos-simplified/site-docs",
           position: "right",
-          
+
         },
 
         {
@@ -82,29 +84,29 @@ module.exports = {
     },
 
     footer: {
-      style:            'dark',
+      style: 'dark',
       links: [
-    
+
         //  right
         {
-          title:        'Development',
+          title: 'Development',
 
           items: [
 
             {
-              label:    'GitHub',
-              href:     "https://www.github.com/templeos-simplified/site-docs",
+              label: 'GitHub',
+              href: "https://www.github.com/templeos-simplified/site-docs",
               position: "right",
             },
 
             {
-              label:    'Contributors',
-              href:     "https://github.com/TempleOS-Simplified/Site-Docs/graphs/contributors",
+              label: 'Contributors',
+              href: "https://github.com/TempleOS-Simplified/Site-Docs/graphs/contributors",
               position: "right",
             }
 
           ],
-        
+
 
         },
 
@@ -112,58 +114,58 @@ module.exports = {
 
         {
 
-          title:        'Contact',
+          title: 'Contact',
 
           items: [
 
             {
-              label:    'Twitter',
-              href:     "https://twitter.com/templeosenjoyer",
+              label: 'Twitter',
+              href: "https://twitter.com/templeosenjoyer",
               position: "center",
             },
 
 
             {
-              label:    'Email (Prefered)',
-              href:     "mailto:xzntrc@fedora.email",
+              label: 'Email (Prefered)',
+              href: "mailto:xzntrc@fedora.email",
               position: "center",
             },
-            
+
           ],
         },
-      
+
         // left
 
         {
 
-          title:        'Donate',
+          title: 'Donate',
 
 
           items: [
 
             {
-              label:    'National Alliance on Mental Health (US)',
-              href:     "https://donate.nami.org/give/197406/#!/donation/checkout?utm_source=globalNav&utm_medium=website&utm_campaign=DonationTracking&c_src=WEBDGe",
+              label: 'National Alliance on Mental Health (US)',
+              href: "https://donate.nami.org/give/197406/#!/donation/checkout?utm_source=globalNav&utm_medium=website&utm_campaign=DonationTracking&c_src=WEBDGe",
               position: "center",
             },
 
 
             {
-              label:    'SANE (UK)',
-              href:     "https://www.sane.org.uk",
+              label: 'SANE (UK)',
+              href: "https://www.sane.org.uk",
               position: "center",
             },
 
 
             {
-              label:    'SANE (AU)',
-              href:     "https://www.sane.org/",
+              label: 'SANE (AU)',
+              href: "https://www.sane.org/",
               position: "center",
             },
 
           ],
-        
-        
+
+
         },
 
 
@@ -194,5 +196,5 @@ module.exports = {
     ],
   ],
 
-  
+
 };
