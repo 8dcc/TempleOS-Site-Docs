@@ -5,7 +5,16 @@ Let's see some basic usage of DolDoc
 ```holyc
 "$BG,BLUE$$FG,YELLOW$I am yellow.$FD$$BD$\n";
 ```
-Here we see we have yellow on a blue background. We use `FD` `BD` to set the forground and background to their defualt colors.
+Here we see we have yellow on a blue background. We use `FD` `BD` to set the forground and background to their defualt colors,and FULL reference of the codes is at the bottom of this page,but here are some common ones
+|Code|Meaning|
+|-|--|
+|TX|Text|
+|FD|Use(or change) default foreground color|
+|BD|Use(or change) default background color|
+|FG|Set foreground color|
+|BG|Set background color|
+|BK|Turn blink on or off with 1 or 0|
+|BT|Button **Surround with newlines to make space for button border**|
 ## Attributes
 DolDoc entries can have attributes and arguments. For example *BG* here takes a color argument.
 ```holyc
@@ -20,48 +29,13 @@ There are attributes too,they start with the plus or minus sign. Lets see an exa
  "$TX+CX,\"CENTER\"$";
  ```
 Now we can see that the text is centered.
-## List of DolDoc codes
-|Code|Meaning|
-|-|--|
-|TX|Text|
-|CR|Newline|
-|SR|Wordwrap line|
-|CU|Cursor pos|
-|TB|Tab|
-|CL|Clear items without +H|
-|PB|Page break|
-|PL|Page length|
-|LM|Left margin|
-|RM|Right margin|
-|HD|Header margin| 
-|FO|Bottom margin|
-|ID|Indents X indents,can be negative|
-|FD|Use(or change) default foreground color|
-|BD|Use(or change) default background color|
-|FG|Set foreground color|
-|BG|Set background color|
-|PT|Prompt|
-|WW|Use 1 to trigger word wrap, 0 to disable word wrap|
-|UL|Use 1 to trigger underline, 0 to disable it|
-|IV|Use 1 to trigger inverting the text's colors,0 to disable it|
-|BK|Turn blink on or off with 1 or 0|
-|SX|Pick a number -7 through 7 to shift the text|
-|SY|Pick a number -7 through 7 to shift the text|
-|CM|Takes 2 arguments X movement and Y movement|
-|LK|Link,will be explained later|
-|BT|Button, **surround with newlines to make space for the button border**|
-|CB|Checkbox|
-|LS|Define a define list with *D* and `DefineLstLoad`,this will let you select items from a list.|
-|MA|Macro,will run code with is clicked,use **LM** to set the macro text|
-|TR|Tree,use indent to nest the trees and use a negative indent to un-nest the trees.|
-|HL|Turn syntax highlighting on with 1 or 0.|
-## List of DolDoc attributes
-To use an attribute,use a plus or minus sign to add/remove the flag from the item.
+## List of DolDoc flags
+To use an flags,use a plus or minus sign to add/remove the flag from the item.
 Example:
 ```holyc
  "$TX+CX+H,\"I have CX and H flags.\"$\n";
  ```
-|Attribute|Descrition|
+|Flag|Descrition|
 |--|--|
 |H|Will prevenet CL from deleteing it|
 |L|Will tell the thing to behave as a link| 
@@ -73,22 +47,6 @@ Example:
 |Q|Will set a exit and not-save flag on a macro|
 |RD| Refresh data on screen update|
 |UD| Update data on typing|
-## Argument codes
-You use a comma and the name to specify an argument value.
-|T|The tag(displayed text) is set with this|
-|--|--|
-|LEN|LEN sets the length of the DA field|
-|A|Links use this for link location|
-|D|LS and list-likes use this for setting the `DefineLstLoad`'ed string that has the list items in it.|
-|LE|Left expression,will evaluate this expression's value when left clicked.|
-|RE|Right expression,will evaluate this expression|
-|LM|Left macro text,will put the text in input buffer when clicked.|
-|RM|Right macro text,will put the text in input buffer when clicked.|
-|RT|Set the raw type of the data of the item,use `I8-64`,or `U8-64` or `F64`|
-|U|User data|
-|SCX|Scroll X in col columns|
-|SX| Shift plus or minus 7 pixels|
-|SY| Same as above but for Y coordinates|
 ## DolDoc programming API.
 ### Basics
 Sometimes you will want to do more with DolDoc.
@@ -134,7 +92,7 @@ Or to save to a file,use `DocWrite` after defining the filename at `DocNew`.
  DocDel(doc);
  ```
  ### User interfaces
-You may want to create user interfaces using DolDoc. There are numerous ways to do this,one way to do this is to use `DocMenu`. This will return a value as defined by `LE` or `RE`. These mean left expression and right expression. Let's see an example.
+You may want to create user interfaces using DolDoc. There are numerous ways to do this,one way to do this is to use `DocMenu`. This will return a value as defined by `LE` or `RE`. These mean left expression and right expression **and are DolDoc attributes(see reference)**. Let's see an example.
 ```holyc
 U0 CreateDialog() {
     CDocEntry *nums[3];
@@ -229,3 +187,56 @@ class CInput {
 }
 MenuLoop;
  ```
+## Reference
+### List of DolDoc codes
+Use these for making DolDoc entities 
+|Code|Meaning|
+|-|--|
+|TX|Text|
+|CR|Newline|
+|SR|Wordwrap line|
+|CU|Cursor pos|
+|TB|Tab|
+|CL|Clear items without +H|
+|PB|Page break|
+|PL|Page length|
+|LM|Left margin|
+|RM|Right margin|
+|HD|Header margin| 
+|FO|Bottom margin|
+|ID|Indents X indents,can be negative|
+|FD|Use(or change) default foreground color|
+|BD|Use(or change) default background color|
+|FG|Set foreground color|
+|BG|Set background color|
+|PT|Prompt|
+|WW|Use 1 to trigger word wrap, 0 to disable word wrap|
+|UL|Use 1 to trigger underline, 0 to disable it|
+|IV|Use 1 to trigger inverting the text's colors,0 to disable it|
+|BK|Turn blink on or off with 1 or 0|
+|SX|Pick a number -7 through 7 to shift the text|
+|SY|Pick a number -7 through 7 to shift the text|
+|CM|Takes 2 arguments X movement and Y movement|
+|LK|Link,will be explained later|
+|BT|Button, **surround with newlines to make space for the button border**|
+|CB|Checkbox|
+|LS|Define a define list with *D* and `DefineLstLoad`,this will let you select items from a list.|
+|MA|Macro,will run code with is clicked,use **LM** to set the macro text|
+|TR|Tree,use indent to nest the trees and use a negative indent to un-nest the trees.|
+|HL|Turn syntax highlighting on with 1 or 0.|
+### Argument codes
+You use a comma and the name to specify an argument value.
+|T|The tag(displayed text) is set with this|
+|--|--|
+|LEN|LEN sets the length of the DA field|
+|A|Links use this for link location|
+|D|LS and list-likes use this for setting the `DefineLstLoad`'ed string that has the list items in it.|
+|LE|Left expression,will evaluate this expression's value when left clicked.|
+|RE|Right expression,will evaluate this expression|
+|LM|Left macro text,will put the text in input buffer when clicked.|
+|RM|Right macro text,will put the text in input buffer when clicked.|
+|RT|Set the raw type of the data of the item,use `I8-64`,or `U8-64` or `F64`|
+|U|User data|
+|SCX|Scroll X in col columns|
+|SX| Shift plus or minus 7 pixels|
+|SY| Same as above but for Y coordinates|
