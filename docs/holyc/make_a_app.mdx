@@ -1,0 +1,626 @@
+# Making an Example App
+You can make your own apps in TempleOS. Doing so is fun once  you get the hang of it,but you will need to get started. In this tutorial,you will learn to make an example program called `GrPaint`. It's like microsoft paint but for TempleOS.
+In this tutorial,we will learn about:
+* User input
+* Graphics,
+* Circular Queues 
+* Basic file stuff.
+Ok time to rock.
+## Setup(Classes 1).
+In our app,we will define some data structures in a `class`. A class holds data and looks like this
+```holyc
+class CName {
+   I64 a,b,c;
+   I64 d,e,f;
+};
+```
+A class has a name and some members,my main class looks like this.
+```holyc
+extern class CEditLayer;
+class CGrPaint {
+//state is the current state(defined later).
+//dft_action is the default action to do(like fill or brush)
+  I64 state,dft_action;
+  I64 w,h;
+  I64 mouse_x;
+  I64 mouse_y;
+//Bit 1 is right
+//Bit 0 is left
+  I64 mouse_buttons;
+  I64 cur_color,cur_thick;
+  I64 _brush_x,_brush_y;
+  CEditLayer *edits;
+  CDC *dc,*picture;
+  U8 *filename;
+} gr_paint;
+//Fill gr_paint will 0's
+MemSet(&gr_paint,0,sizeof(CGrPaint));
+```
+Sometimes we want to represent something(like the current state) with a number,but it may get tedious to remember the numbers. For this we use...
+## Macros
+Macros are pieces of text that get inserted into the source code. Here,I to hold the state numbers in a clean way.
+```holyc
+#define PS_NONE 0 //PS means Paint State
+#define PS_BRUSH 1
+#define PS_FILL 2
+#define PS_UNDO 3
+```
+But you can put any text in a macro. Let's see an example
+```holyc
+#define TEXT "I love onions"
+"%s\n",TEXT;
+```
+Let's define some more macros for our project
+```holyc
+#define COLOR_BOX_WIDTH 12
+#define SIDE_BAR_WIDTH (5*8)
+#define TOP_BAR_HEIGHT 0
+#define PIC_W (GR_WIDTH-SIDE_BAR_WIDTH)
+#define PIC_H (GR_HEIGHT-TOP_BAR_HEIGHT)
+```
+## Setup(Classes 2)
+Sometimes we want to use an existing class as a base type for a new class. We can do this via inheritance. **Inheritance will add all the members from a base class to another class**. It is very epic. Let's see an example:
+```holyc
+class ABC {
+  I64 a,b,c;
+};
+//Inherited class after ':'
+class ABCDEF:ABC {
+  I64 d,e,f;
+}; 
+ABC abc;
+abc.a=1;
+abc.b=2;
+abc.c=3;
+ABCDEF abcdef;
+//We get 'a' from ABC,and the ABC class starts at the address of abcdef
+abcdef.a=1;
+//..
+abcdef.d=4;
+abcdef.e=5;
+abcdef.f=6;
+```
+## Setup(Circular Queues)
+In our App,I use `CQue` as a base class for our edits,and when we inherit from a base class,we can use the **class like the base class via a  pointer as the base class gets stored at the start of the new class**.
+So let's see some code:
+```holyc
+class CEditLayer:CQue {
+  CDC *dc;
+};
+U0 NewUndoLayer() {
+  CEditLayer *new=CAlloc(sizeof CEditLayer); //Allocate memory for new edit
+  //QueInit takes a pointer to CQue,but it is okay to use CEditLayer as it has a base class of CQue
+  QueInit(new);
+  QueIns(new,gr_paint.edits->last);
+  new->dc=DCCopy(gr_paint.picture);
+}
+U0 UndoEnd() {
+  gr_paint.state=PS_NONE;
+}
+```
+![inserting a CQue](queins.jpg)
+
+Here we insert the `new` edit into the chain. A circular queue has a head element and it's buddies. `gr_paint.edits` is the head element,and it has a pointer to it's last element in `last`.
+
+When we want to add an item,use `QueIns(new,at);`. Here will use `gr_paint.edits->last` to insert our new edit at the end of the chain.
+
+But wait,what about undo'ing.. Glad you asked:.
+```holyc
+extern U0 Redraw(Bool bg=FALSE);
+U0 StartUndo() {
+  CEditLayer *edit;
+  if(gr_paint.state!=PS_UNDO) {
+    gr_paint.state=PS_UNDO;
+    edit=gr_paint.edits->last;
+    if(edit!=gr_paint.edits) { //Check if not head element
+      QueRem(edit);
+      DCDel(gr_paint.picture);
+      gr_paint.picture=edit->dc;
+      Free(edit);
+      Redraw(TRUE);
+    }
+  }
+}
+
+//Ignore this,it just ends the undo
+U0 EndUndo() {
+ gr_paint.state=PS_NONE;
+}
+```
+It may be alot to take in,but ill explain. To remove an item from the `CQue`,use `QueRem`. But things get a little tricky here. **BE SURE TO NOT DELETE THE HEAD ELEMENT**. Elements in a `CQue` are **Circular**,meaning the chain loops around.
+So the `gr_paint.edits->last` will point to the head if the chain is *empty*. 
+~[Wrap around](wrap_around.jpg)
+## Graphics time
+Graphics in TempleOS are very easy to use,we can draw a rectangle to the screen via `GrRect`(and freinds),but we will first need to specify the color first on the global `CDC`(known as `gr.dc`)
+
+Lets see an example: 
+```holyc
+gr.dc->color=RED;
+GrRect(gr.dc,0,0,100,100);
+Sleep(1000); //Sleep for 1000 milliseconds
+DCFill(gr.dc,TRANSPARENT);
+```
+Most programs typically have a user interface,so let's draw a color chooser. I will add logic for handling the mouse during this draw routine too,but don't panic as it will be described later
+```holyc
+I64 DrawColorBar(CDC *dc,I64 x,I64 y) {
+//Draw a grid with the colors
+/*
+ This is what it looks like
+  _____
+  | | |
+  | | |
+  =====
+  | | |
+  | | |
+  =====
+   ...
+   ...
+  =====
+*/
+  I64 x2,y2,color=0,bx,by;
+  for(y2=0;y2!=8;y2++) //Loop for each row
+    for(x2=0;x2!=2;x2++) { //Loop for each column
+      dc->thick=2;
+      dc->color=BLACK;
+//Draw border(center will be filled with color later)
+      GrRect(
+        dc,
+        x+x2*COLOR_BOX_WIDTH,
+        y+y2*COLOR_BOX_WIDTH,
+        COLOR_BOX_WIDTH,
+        COLOR_BOX_WIDTH
+      );
+//If mouse is down,we assign the color
+      bx=x+x2*COLOR_BOX_WIDTH+1;
+      by=y+y2*COLOR_BOX_WIDTH+1;
+      //Bt tests if a bit is set,we use it here to check if we are clicking-
+      if(Bt(&gr_paint.mouse_buttons,0))
+        if(bx<=gr_paint.mouse_x<=bx+COLOR_BOX_WIDTH-2)
+          if(by<=gr_paint.mouse_y<=by+COLOR_BOX_WIDTH-2)
+            gr_paint.cur_color=color;
+//Fill in the center
+      dc->color=color++;
+      GrRect(
+        dc,
+        x+x2*COLOR_BOX_WIDTH+1,
+        y+y2*COLOR_BOX_WIDTH+1,
+        COLOR_BOX_WIDTH-2,
+        COLOR_BOX_WIDTH-2
+      );
+    }
+  return y+y2*COLOR_BOX_WIDTH+4;
+}
+```
+We will need a tools ,And we can draw the tool's name via `GrPrint(dc,x,y"text");`
+```holyc
+I64 DrawTool(CDC *dc,I64 x,I64 y,U8 *name,I64 tool) {
+  I64 len=StrLen(name);
+  if(gr_paint.dft_action==tool) {
+    dc->color=BLUE;
+    GrRect(dc,x,y,SIDE_BAR_WIDTH,FONT_HEIGHT);
+    dc->color=RED;
+  } else
+   dc->color=BLACK;
+  GrPrint(dc,x,y,name);
+  if(Bt(&gr_paint.mouse_buttons,0))
+    if(x<=gr_paint.mouse_x<=x+SIDE_BAR_WIDTH)
+      if(y<=gr_paint.mouse_y<=y+FONT_HEIGHT)
+        gr_paint.dft_action=tool;
+  return y+FONT_HEIGHT;
+}
+```
+Let's throw in both these functions into a function
+```holyc
+U0 DrawUI(CDC *dc) {
+  I64 y=0;
+  dc->color=WHITE;
+  GrRect(dc,0,0,SIDE_BAR_WIDTH,GR_HEIGHT);
+  dc->color=CYAN;
+  GrPrint(dc,0,0,"Tool"),y+=FONT_HEIGHT;
+  y=DrawColorBar(dc,0,y);
+  y=DrawTool(dc,0,y,"[Pnt]",PS_BRUSH);
+  y=DrawTool(dc,0,y,"[Fll]",PS_FILL);
+}
+```
+## User Input
+User input in TempleOS is typically handled via events. We can look at events via `ScanMsg`,or if we want keys we can use 	`ScanKey(I64 *charactor,I64 *scancode)`. A scancode is the raw key from the keybaord and the readable charactor.
+Let's see an example of getting user input,but first know that **while looping for input you should use `Refresh` to allow TempleOS to refresh the screen**. Lets get started
+```holyc
+U0 InputLoop() {
+  I64 ch,sc;
+  while(TRUE) {
+    if(ScanKey(&ch,&sc)) {
+      if(ch=='Q') {
+        "Quiting\n";
+        break;
+      } else 
+       "Got a '%C'\n",ch;
+    }
+    Refresh;
+  }
+}
+InputLoop;
+```
+Here we only checked for a charactor,but what about *scancodes*. Ill explain. A scancode has flags and a unique value. A flag tells you what modifier key is down,like `SCF_SHIFT`,`SCF_CTRL`,or `SCF_ALT`. We can can test for a flag by using the `&` operator.
+```holyc
+//DONT COPY TTHIS
+U0 InputLoop() {
+  I64 ch,sc;
+  while(TRUE) {
+    if(ScanKey(&ch,&sc)) {
+      if(ch=='Q') {
+        "Quiting\n";
+        break;
+      } else if(!(SCF_SHIFT&sc))
+       "Got a '%C'(No SHIFT key)\n",ch;
+      else
+       "Got a '%C'(SHIFT key)\n",ch;
+
+    }
+    Refresh;
+  }
+}
+InputLoop;
+```
+You can get the mouse cordnates on a window via `ScanMsg`,or if you want to system mouse cornates you can do `ms.pos.x`/`ms.pos.y`,you can check the buttons via `ms.lb`/`ms.rb `
+Let's What our input loop looks like.
+```holyc
+U0 GrPaint() {
+   //...
+  while(TRUE) {
+    gr_paint.mouse_x=ms.pos.x;
+    gr_paint.mouse_y=ms.pos.y;
+    BEqu(&gr_paint.mouse_buttons,0,ms.lb);
+    BEqu(&gr_paint.mouse_buttons,1,ms.rb);
+    DrawUI(gr_paint.dc);
+    if(ms.lb) {
+      //..
+    }
+    if(ScanKey(&ch,&sc)) {
+      if(ch==CH_CTRLF) {
+        //...
+      }
+    }
+    //...
+  }
+}
+```
+## Tool time(Brush)
+A paint program needs tools. So let's make the most basic tool: *the brush*. In our app,we have states,and `PS_BRUSH` is our brush state. We will `StartBrushPaint()` when we start a stroke,and must end the stroke with `EndBrushPaint()`. We will also update the stoke every mouse move with `ContinueBrushPaint()`.
+
+In our `StartBrushPaint`,we make an undo layer ,and then we set the brush cordnates.
+```holyc
+U0 StartBrushPaint() {
+  gr_paint.state=PS_BRUSH;
+  gr_paint._brush_x=gr_paint.mouse_x;
+  gr_paint._brush_y=gr_paint.mouse_y;
+  NewUndoLayer;
+}
+```
+
+`ContinueBrushPaint` will draw a line for the stoke if we have moved the mouse.  
+```holyc
+U0 ContinueBrushPaint() {
+  I64 ox=gr_paint._brush_x,oy=gr_paint._brush_y;
+  if(gr_paint.mouse_x!=(ox=gr_paint._brush_x)||
+     gr_paint.mouse_y!=(oy=gr_paint._brush_y)) {
+    gr_paint.picture->thick=gr_paint.cur_thick;
+    gr_paint.picture->color=gr_paint.cur_color;
+    gr_paint._brush_x=gr_paint.mouse_x;
+    gr_paint._brush_y=gr_paint.mouse_y;
+    GrLine3(gr_paint.picture,ox,oy,0,gr_paint._brush_x,gr_paint._brush_y,0);
+  }
+  Redraw;
+}
+```
+Here we used `GrLine3` to do some epic line drawing. We can we set the thickness and color with `CDC.cur_color` and `CDC.thick`. 
+
+And finaly we end the state via
+```holyc
+U0 EndBrushPaint() { 
+  gr_paint.state=PS_NONE;
+}
+```
+## Tool Time 2(Fill tool)
+This tool is pretty easy,use `GrFloodFill`.
+```holyc
+U0 FillToolStart() {
+  NewUndoLayer;
+  gr_paint.state=PS_FILL;
+  gr_paint.picture->color=gr_paint.cur_color;
+  GrFloodFill(gr_paint.picture,gr_paint.mouse_x,gr_paint.mouse_y);
+  Redraw;
+}
+U0 FillToolEnd() {
+   gr_paint.state=PS_NONE;
+}
+```
+## Tool Time 3(Undo)
+See the code from [Setup(Circular-Queues)](#Setup(Circular-Queues))
+## User Input 2,Menus
+TempleOS has a menu system. You can hold down the logo key to access the menu and it looks something like this:
+[img](todo.jpeg)
+
+We can push a menu to TempleOS with `MenuPush`. But first we need to know how menus work. Menus work by sending events to the current task. These messages are `MSG_KEY_DOWN`,and the arguments are the charactor and scancode. Let's see an example.
+```holyc 
+U0 MenuLoop() {
+  I64 ch;
+  MenuPush(
+    "File {"
+//1st is message(Default is MSG_KEY_DOWN)
+//2nd is charctor
+//3rd is scancode
+    "  Exit(,CH_SHIFT_ESC,);"
+    "}"
+    "Fruit {"
+    "    Apple(,'apple',);"
+    "    Banana(,'banana',);"
+    "    Berry(,'berry',);"
+    "}"
+    "Vegetable {"
+    "    Carrot(,'carrot',);"
+    "    Celery(,'celery',);"
+    "}"
+  );
+  "Access stuff from the menu!!\n";
+  while(ch=GetKey) {
+    if(ch==CH_SHIFT_ESC) break;
+    "Got a %c\n",ch;
+  }
+  MenuPop;
+}
+MenuLoop;
+```
+Let's look at our init code
+```holyc
+U0 Init() {
+  gr_paint.edits=CAlloc(sizeof(CQue));
+  gr_paint.dc=gr.dc;
+  gr_paint.picture=DCNew(GR_WIDTH,GR_HEIGHT);
+  QueInit(gr_paint.edits);
+  //Fill with transparent
+  DCFill(gr_paint.dc);
+  DCFill(gr_paint.picture);
+  WinBorder;
+  WinMax;
+  MenuPush(
+    "File {"
+    "    Save(,CH_CTRLS,);"
+    "    Exit(,CH_ESC,);"
+    "    Abort(,CH_SHIFT_ESC,);"
+    "}"
+    "Edit {"
+    "    Brush(,CH_CTRLB,);"
+    "    Fill(,CH_CTRLF,);"
+    "}"
+  );
+}
+```
+## Creating an Epic Background Pattern
+Our backround could be all white,but that wouldn't be too fun,so I will make a checkerboard pattern. A key aspect of this pattern is switching the color on and off. Luckily computers can do this via a bitwise operator. This operator is called an XOR operator and looks like this in HolyC `^`.
+
+An XOR operator will toggle the other  bit if a bit is set. Let's see it in table form:
+|A|B|Result|
+|--|--|--|
+|1|1|0| 
+|1|0|1| 
+|0|1|1| 
+|0|0|0| 
+Here,I XOR with 1,and  by doing so the value will turn off or on,let's see the nlock
+```holyc
+U0 DrawCheckers(CDC *dc,I64 x,I64 y,I64 w,I64 h) {
+#define CHECKER_WIDTH 14
+  //Draw a checker board pettern
+  I64 blink=FALSE,blink2=FALSE;
+  I64 color;
+  I64 x2,y2;
+  for(x2=x;x2<x+w;x2+=CHECKER_WIDTH) {
+    //XORing toggles a bit,so we XOR with TRUE to toggle it
+    blink=blink2^=TRUE;
+    for(y2=y;y2<w+h;y2+=CHECKER_WIDTH) {
+      if(blink)
+        blink=FALSE,color=LTGRAY;
+      else
+        blink=TRUE,color=WHITE;    
+      dc->color=color;
+      GrRect(dc,x2,y2,CHECKER_WIDTH,CHECKER_WIDTH);
+    }
+  }
+}
+```
+## Putting it all Togheter
+We will need to be able save the file. Luckily for us we can save a `CDC` with `GRWrite(filename,dc);` but we will need get a filename first. We can get a pop-up window with `PopUpFileName(default);`. Will will need to clear the graphics off the screen so we can look at the window first,so we `DCFill`
+```holyc
+extern CDC *AutoCrop(CDC *img);
+U0 SaveFileAs(Bool prompt=TRUE) {
+  CDC *dc;
+  if(prompt)
+    Free(gr_paint.filename);
+  DCFill;
+  if(prompt||!gr_paint.filename)
+  gr_paint.filename=PopUpFileName("DRAWING.GR");
+  //We will define AutoCrop later
+  dc=AutoCrop(gr_paint.picture);
+  if(gr_paint.filename)
+    GRWrite(gr_paint.filename,dc);
+  DCDel(dc);
+  Redraw(TRUE);
+}
+```
+It would be strange to save the area around the image,so we will make a function to crop the image for us. Here will will use `GrPeek0` and `GrPlot0`. These do not apply transformations and are relativly fast. 
+```holyc
+CDC *AutoCrop(CDC *img) {
+  I64 x,y,top=-1,left=-1,bottom=I64_MIN,right=I64_MIN;
+  CDC *dc;
+  for(x=SIDE_BAR_WIDTH;x!=PIC_W;x++) //Image includes sidebar
+    for(y=0;y!=PIC_H;y++) {
+     if(top==-1||y<top)
+       if(GrPeek0(img,x,y)!=TRANSPARENT)
+        top=y;
+     if(left==-1||x<left)
+       if(GrPeek0(img,x,y)!=TRANSPARENT)
+        left=x;
+     if(GrPeek0(img,x,y)!=TRANSPARENT)
+       if(right<x)
+         right=x;
+     if(GrPeek0(img,x,y)!=TRANSPARENT)
+       if(bottom<y)
+         bottom=y;
+    }
+  if(top==-1||left==-1)
+    return DCNew(0,0);
+  dc=DCNew(right-left+1,bottom-top+1,);
+  for(x=left;x!=right+1;x++)
+    for(y=top;y!=bottom+1;y++) {
+      dc->color=GrPeek0(img,x,y);
+      GrPlot0(dc,x-left,y-top);
+    }
+  return dc;
+}
+```
+Sometimes we need to repaint the screen,so let's do that
+```holyc
+U0 FastPutPicture(CDC *picture) {
+  I64 p;
+  for(p=0;p!=GR_WIDTH*GR_HEIGHT;p++) {
+    if(picture->body[p]!=TRANSPARENT)
+      gr.dc->body[p]=picture->body[p];
+  }
+}
+U0 Redraw(Bool bg=FALSE) {
+  if(bg)
+    DrawCheckers(gr_paint.dc,SIDE_BAR_WIDTH,0,PIC_W,PIC_H);
+  FastPutPicture(gr_paint.picture);
+  DrawUI(gr_paint.dc);
+}
+```
+
+We should cleanup when we exit the program. Each TempleOS `CTask` has a `task_end_cb`,which takes a fun ction address which will can get via the `&`  operator. Fs points to the current `CTask`
+```holyc
+U0 DeInit() {
+  MenuPop;
+  DCFill(gr.dc);
+}
+U0 GrPaintExit() {
+  Exit;
+} 
+//We will put this in the GrPaint function later
+//Fs->task_end_cb=&DeInit;
+```
+And finally we need the `GrPaint` logic.
+```holyc
+U0 GrPaint() {
+  I64 x,y,res,ch,sc;
+  CEditLayer *edit;
+  AutoComplete;
+  Init;
+  gr_paint.dft_action=PS_BRUSH;
+  Fs->task_end_cb=&DeInit;
+  gr_paint.cur_thick=10;
+  Redraw(TRUE);
+  while(TRUE) {
+    gr_paint.mouse_x=ms.pos.x;
+    gr_paint.mouse_y=ms.pos.y;
+    BEqu(&gr_paint.mouse_buttons,0,ms.lb);
+    BEqu(&gr_paint.mouse_buttons,1,ms.rb);
+    DrawUI(gr_paint.dc);
+    if(ms.lb) {
+      //Left click
+      switch(gr_paint.state) {
+        case PS_NONE:
+          //Only activate if we are in the drawing area
+          if(SIDE_BAR_WIDTH<=gr_paint.mouse_x<=GR_WIDTH)
+            if(TOP_BAR_HEIGHT<=gr_paint.mouse_y<=GR_HEIGHT) {
+              gr_paint.state=PS_BRUSH;
+              switch(gr_paint.dft_action) {
+              case PS_BRUSH:
+                StartBrushPaint;
+                goto next;
+              case PS_FILL:
+                FillToolStart;
+                goto next;;
+              }
+            }
+          break;
+        case PS_FILL:
+          //We go to the next as we haven't release the left click yet
+          goto next;
+        case PS_BRUSH:
+          ContinueBrushPaint;
+          goto next;
+        default:
+         goto end_state;
+      }
+    } else {
+      //Left button is up
+      switch(gr_paint.state) {
+        case PS_BRUSH:
+        case PS_FILL:
+          goto end_state;
+      }
+    }
+    if(ScanKey(&ch,&sc)) {
+      if(ch==CH_CTRLF) {
+        gr_paint.dft_action=PS_FILL;
+        goto end_state;
+      }
+      if(ch==CH_CTRLU) {
+         if(gr_paint.state==PS_NONE) {
+           StartUndo;
+          goto next;
+         } else if(gr_paint.state==PS_UNDO) {
+           //If we hold 'u' down,be sure to not undo again to avoid repatingly undoing your work
+           goto next;
+         } else goto end_state;
+      }
+      if(ch==CH_CTRLS) {
+        SaveFileAs(FALSE);
+        goto next;
+      }
+      if(ch==CH_CTRLB) {
+        gr_paint.dft_action=PS_BRUSH;
+        goto end_state;
+      }
+      if(ch==CH_ESC) {
+        SaveFileAs(FALSE);
+        break;
+      } 
+      if(ch==CH_SHIFT_ESC) {
+        break;
+      }
+    }
+//Undo is triggered by button,so if no 
+end_state:
+      switch(gr_paint.state) {
+        case PS_NONE:
+          break;
+        case PS_BRUSH:
+          EndBrushPaint;
+          break;
+        case PS_FILL:
+          FillToolEnd;
+          break;
+        case PS_UNDO:
+          UndoEnd;
+          break;
+      }
+next:
+    Refresh;
+  }
+  GrPaintExit;
+}
+```
+Be sure to call the `GrPaint` function at the end
+```holyc
+GrPaint;
+```
+
+![Painting](painting.jpg)
+
+## Conclusion
+Writing an app in TempleOS can be difficult at the start,but it get's easier as you go along. And now you even have a means of creating `.GR` files for your games
+If you want to view an Image,do 
+```holyc
+//DocPut is the current document
+DocGR(DocPut,"DRAWING.GR");
+```
