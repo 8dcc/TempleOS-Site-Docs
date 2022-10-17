@@ -98,7 +98,7 @@ U0 UndoEnd() {
   gr_paint.state=PS_NONE;
 }
 ```
-![inserting a CQue](queins.jpg)
+![inserting a CQue](queins.JPG)
 
 Here we insert the `new` edit into the chain. A circular queue has a head element and it's buddies. `gr_paint.edits` is the head element,and it has a pointer to it's last element in `last`.
 
@@ -129,7 +129,7 @@ U0 EndUndo() {
 ```
 It may be alot to take in,but ill explain. To remove an item from the `CQue`,use `QueRem`. But things get a little tricky here. **BE SURE TO NOT DELETE THE HEAD ELEMENT**. Elements in a `CQue` are **Circular**,meaning the chain loops around.
 So the `gr_paint.edits->last` will point to the head if the chain is *empty*. 
-~[Wrap around](wrap_around.jpg)
+~[Wrap around](wrap_around.JPG)
 ## Graphics time
 Graphics in TempleOS are very easy to use,we can draw a rectangle to the screen via `GrRect`(and freinds),but we will first need to specify the color first on the global `CDC`(known as `gr.dc`)
 
