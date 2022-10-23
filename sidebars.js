@@ -25,10 +25,11 @@ const sidebars = {
     "holyc/intro",
     "holyc/getting-started-hc",
     "holyc/printing",
-    "holyc/datastructs"
+    "holyc/datastructs",
+    "holyc/graphics",
+    "holyc/grpaint",
+    "holyc/doldoc"
   ]
-
-
 }
 
 module.exports = sidebars
