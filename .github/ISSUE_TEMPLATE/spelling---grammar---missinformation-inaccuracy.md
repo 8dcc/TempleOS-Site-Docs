@@ -1,10 +1,9 @@
 ---
 name: Spelling / Grammar / Missinformation inaccuracy
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: Spelling / Grammar / Missinformation Report
-assignees: ''
-
+assignees: ""
 ---
 
 **Outline the mistake**

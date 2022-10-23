@@ -2,18 +2,24 @@
 id: datastructs
 title: Data Structures
 ---
+
 # Data structures
+
 Data structures are cool structures that store data.
+
 ## HashTable
+
 Hash tables are like dictionaries you can add stuff to on the fly,each `CTask` has a hash table which you can get via `Fs` .
-*Each item in the hash table has a type and str*,to look for a define do this
+_Each item in the hash table has a type and str_,to look for a define do this
+
 ```holyc
 #define ONION 10
 CHashDefineStr *d=HashFind("ONION",Fs->hash_table,HTT_DEFINE_STR);
 "%s\n",d->data;
 ```
- 
+
 In TempleOS,you can add items to the table,we first need to MAlloc an item first, then fill in the table
+
 ```holyc
 CHashDefineStr *d=CAlloc(sizeof(CHashDefineStr));
 d->str=StrNew("Hello"); //Must allocate string on heap
@@ -23,7 +29,9 @@ HashAdd(d,Fs->hash_table);
 //We added the macro Hello into the hash table
 "%d\n",Hello;
 ```
+
 You can make your own hash-tables via`HashTableNew`. **The size must be a power of 2**. You can free it with `HashTableDel`.
+
 ```holyc
 CHashTable *ht=HashTableNew(0x100);
 CHashGeneric *ent=CAlloc(sizeof CHashGeneric);
@@ -37,29 +45,36 @@ CHashGeneric *g=HashFind("look",ht,HTT_FRAME_PTR);
 "%d,%d,%d\n",g->user_data0,g->user_data1,g->user_data2;
 HashTableDel(ht);
 ```
+
 As you may have seen,each `CHash` item has a type.
 Here is a list of he some of the `HTT` types and what class they use
 
-|Type|Class|Notes|
-|------|------|---|
-|HTT_INVALID|None| Cannot be selected|
-|HTT_GLBL_VAR|`CHashGlblVar*`|`->data_addr` points to data|
-|HTT_CLASS|`CHashClass*`|Can be used for metadata|
-|HTT_FRAME_PTR|`CHashGeneric*`|This can be set with| `FramePtrAdd`(use `FramePtr` to get)|
+| Type          | Class           | Notes                        |
+| ------------- | --------------- | ---------------------------- | ------------------------------------ |
+| HTT_INVALID   | None            | Cannot be selected           |
+| HTT_GLBL_VAR  | `CHashGlblVar*` | `->data_addr` points to data |
+| HTT_CLASS     | `CHashClass*`   | Can be used for metadata     |
+| HTT_FRAME_PTR | `CHashGeneric*` | This can be set with         | `FramePtrAdd`(use `FramePtr` to get) |
 
 ## Fifo
-Fifo means "First In First Out". It is like a *stack* of papers,the first paper you put in is the first one you get out,**In TempleOS,CFifo's must be aligned to a power of 2.**
+
+Fifo means "First In First Out". It is like a _stack_ of papers,the first paper you put in is the first one you get out,**In TempleOS,CFifo's must be aligned to a power of 2.**
+
 ```holyc
 CFifoI64 *fifo=FifoI64New(0x100);
 ```
+
 We can insert items via `FifoI64Ins`.
+
 ```holyc
 I64 bottom;
 FifoI64Ins(fifo,1);
 FifoI64Ins(fifo,2);
 FifoI64Ins(fifo,3); //1 is on bottom
 ```
+
 Use `FifoI64Rem` to remove an item.
+
 ```holyc
 FifoI64Rem(fifo,&bottom);
 "%d\n",bottom;
@@ -68,34 +83,43 @@ FifoI64Rem(fifo,&bottom);
 FifoI64Rem(fifo,&bottom);
 "%d\n",bottom;
 FifoI64Del(fifo);
- ```
+```
+
 There are 2 variants of Fifo's in TempleOS,the `CFifoI64`,`CFifoU8`. One hold's `I64`'s and the other holds `U8`'s.
 
-Once a Fifo gets full,the oldest item will be removed for you(It's initial size it created with `FifoI64New/FifoU8New`). You can get the current size via `FifoI64Cnt`.  You can empty all items in the fifo with `FifoI64Flush`,or you can peak at the bottom by doing this
- ```holyc
+Once a Fifo gets full,the oldest item will be removed for you(It's initial size it created with `FifoI64New/FifoU8New`). You can get the current size via `FifoI64Cnt`. You can empty all items in the fifo with `FifoI64Flush`,or you can peak at the bottom by doing this
+
+```holyc
 I64 bottom;
 FifoI64Peek(fifo,&bottom);
- ```
- ## Circular Queue
- These are useful as(unlike an array) you do not need to resize an array to add more items,and removing items is very easy. A *Circular Queue* is bodacious as it a chain of items,and inserting/removing items only requires editing one chain link(and not the whole chain). So what does it look like in action.
- 
- You will need to have your class have he base class of `CQue` . You can do it like this:
- ```holyc
+```
+
+## Circular Queue
+
+These are useful as(unlike an array) you do not need to resize an array to add more items,and removing items is very easy. A _Circular Queue_ is bodacious as it a chain of items,and inserting/removing items only requires editing one chain link(and not the whole chain). So what does it look like in action.
+
+You will need to have your class have he base class of `CQue` . You can do it like this:
+
+```holyc
 class CQInt:CQue { //CQue is the baseclass
-    I64 value;
+   I64 value;
 };
- ``` 
- Each node has a `last` and `next` member,which point to the previous and next item in the chain. **Each chain item has a head element**,and because the chains are circular,the chain starts and ends at head. So when we loop,we check for the head element,here is part of an example:
- ```holyc
+```
+
+Each node has a `last` and `next` member,which point to the previous and next item in the chain. **Each chain item has a head element**,and because the chains are circular,the chain starts and ends at head. So when we loop,we check for the head element,here is part of an example:
+
+```holyc
 "I have %d elements.\n",QueCnt(head); //ONLY call on head
 //The queue is circular. It starts AND ENDS at head
 CQInt *cur=head->next; //Goto element after head
 while(cur!=head) { //Ends at head
-    "I found a %d\n",cur->value;
-    cur=cur->next;
+   "I found a %d\n",cur->value;
+   cur=cur->next;
 }
 ```
- When we create a chain link,we `CAlloc` it to allocation some memory for it. Use`QueInit` to initialize the node .We use `QueIns(new,head->last);` to add it. With that being said,let's see the full example.
+
+When we create a chain link,we `CAlloc` it to allocation some memory for it. Use`QueInit` to initialize the node .We use `QueIns(new,head->last);` to add it. With that being said,let's see the full example.
+
 ```holyc
 class CQInt:CQue {
     I64 value;
