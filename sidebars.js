@@ -28,6 +28,7 @@ const sidebars = {
     "holyc/datastructs",
     "holyc/graphics",
     "holyc/grpaint",
+    "holyc/doldoc"
   ]
 }
 
