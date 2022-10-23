@@ -3,8 +3,8 @@ id: graphics
 title: Graphics
 ---
 
-
 # Fun with Graphics
+
 Graphics are the things your user see's,and TempleOS can do much more than just text. Graphics are done via `CDC`'s also known as Drawing Contexts. Each window has a function pointer in `Fs->draw_it` which points to drawing function. Let's see what it looks like.
 ![Simple](/img/graphics1.png)
 
@@ -16,12 +16,14 @@ U0 DrawIt(CTask *,CDC *dc) {
 }
 Fs->draw_it=&DrawIt;
 ```
+
 Here we will use a function pointer to draw the screen.  
 The function used here takes 2 arguments,the `CTask`and the `CDC`.  
 The `CDC` is a drawing context,and we use functions to draw on it like `GrRect`.  
 We can also edit the dc directly to change the color of the drawer.
 
 There are other Graphics functions as well...
+
 ```holyc
 U0 DrawIt(CTask *,CDC *dc) {
   dc->color=BLUE;
@@ -33,14 +35,17 @@ U0 DrawIt(CTask *,CDC *dc) {
   GrRect(dc,200,200,100,100);
   dc->color=YELLOW;
   GrPrint(dc,0,0,"Hello %s","World");
-} 
+}
 Fs->draw_it=&DrawIt;
 ```
+
 ![More](/img/graphics2.png)
 
 ## Drawing Contexts
+
 Drawing contexts are what let us actually draw to the screen.  
 We can create drawing contexts with `DCNew(w,h)`. These aren't draw to the Screen, but you can blot them to the screen via `GrBlot`
+
 ```holyc
 CDC *new=DCNew(100,100);
 DCClear(new);
@@ -53,11 +58,13 @@ U0 DrawIt(CTask *,CDC *dc){
 }
 Fs->draw_it=&DrawIt;
 ```
+
 ![g3](/img/graphics3.png)
 
 We can access the same image in 2 different drawing contexts,we can do this via `DCAlias`  
 `DCAlias` will make a copy of a CDC,but it will point to the same image in RAM.  
 Here's an Example:
+
 ```holyc
  CDC *old=DCNew(100,100);
  DCClear(old); //Clear our new CDC
@@ -72,10 +79,13 @@ Here's an Example:
  DCDel(old); //Free our CDC's
  DCDel(new);
 ```
+
 ![graphics4](/img/graphics4.png)
 
 ## Transformations
-TempleOS uses transformation matrices to do things like rotation and scaling and other 3D stuff. These transformations can be combined. Here,we rotate a circle around the center by using 2 transformations here,a Z rotation,and a translation transformation.  The Z rotation is good for 2D transformations,and we set the center of the rotation to 50,50 via **Mat4x4TranslationEqu**. It looks silly and epic. **We must also enable transformations via DCF_TRANSFORMATION**,( and use a graphics function typically ending in "3")
+
+TempleOS uses transformation matrices to do things like rotation and scaling and other 3D stuff. These transformations can be combined. Here,we rotate a circle around the center by using 2 transformations here,a Z rotation,and a translation transformation. The Z rotation is good for 2D transformations,and we set the center of the rotation to 50,50 via **Mat4x4TranslationEqu**. It looks silly and epic. **We must also enable transformations via DCF_TRANSFORMATION**,( and use a graphics function typically ending in "3")
+
 ```holyc
 CDC *dc=DCNew(100,100);
  dc->r=Mat4x4IdentNew;
@@ -96,22 +106,29 @@ CDC *dc=DCNew(100,100);
  DCDel(dc);
  DCFill;
 ```
+
 ![spin_yellow](/img/spin_yellow.gif)
-  
-Try switching up the X_Y_Z rotations.  
--   The Z axis points towards the screen.
--   The X axis points to the left.
--   The Y axis points up.
+
+Try switching up the X_Y_Z rotations.
+
+- The Z axis points towards the screen.
+- The X axis points to the left.
+- The Y axis points up.
+
 ## Transformations(2)
+
 Transformations use a matrix,which I wont explain the mathematics in much detail here.  
 There is a thing called the identity matrix,which is the "default" matrix.  
 To reset the drawing context's matrix,do this
+
 ```holyc
 Mat4x4IdentEqu(dc->R);
 // Or if you want a new Matrix
 dc->R=Mat4x4IdentNew;
 ```
+
 We can combine transformations on a single matrix,be sure to do them in the order you want
+
 ```holyc
  CDC *dc=DCNew(200,200);
  dc->r=Mat4x4IdentNew;
@@ -136,11 +153,13 @@ We can combine transformations on a single matrix,be sure to do them in the orde
  DCDel(dc);
  DCFill;
 ```
-We can use depth buffer,now for a cube without the top and bottom  
 
--   Use  _DCDepthBufAlloc_  to allocate a depth buffer
--   Be sure to  _DCDepthBufRst_  after each call!!!.
--   The z buffer is symbolic and is only used for checking if an item is behind another. It doesn't shrink at stuff goes farther away.
+We can use depth buffer,now for a cube without the top and bottom
+
+- Use _DCDepthBufAlloc_ to allocate a depth buffer
+- Be sure to _DCDepthBufRst_ after each call!!!.
+- The z buffer is symbolic and is only used for checking if an item is behind another. It doesn't shrink at stuff goes farther away.
+
 ```holyc
  CD3I32 poly[4]= {{-100,-100,-100},{100,-100,-100},{100,100,-100},{-100,100,-100}};
  I64 colors[4]= {BLUE,YELLOW,GREEN,CYAN};
@@ -152,7 +171,7 @@ We can use depth buffer,now for a cube without the top and bottom
  F64 rotx=0,roty;
  CD3I32 cube[6][6];
  I64 i=0,i2=0;
- I64 *trans=Mat4x4IdentNew; 
+ I64 *trans=Mat4x4IdentNew;
  for(rotx=0.; rotx<=(2.*pi)-1.; rotx+=2*pi/4.) {
      //Mat4x4TranslationEqu(trans,50,50,50);
      Mat4x4IdentEqu(trans);
@@ -184,11 +203,13 @@ We can use depth buffer,now for a cube without the top and bottom
  DCDel(dc);
  DCFill;
 ```
+
 ![cubeish](/img/cubeish.gif)
 
 Eariler I said that Z doesnt shrink as you go farther,that's because we need a transformation callback!  
 We can put such a callback in `CDC.transform` with the `DCF_TRANSFORMATION` flag. We divide by z to get a simulate going back.  
 Let's make a shrinking rectangle
+
 ```holyc
  #define SCRN_SCALE 512
  U0 Transform(CDC *dc,I64 *x,I64 *y,I64 *z)
@@ -208,7 +229,7 @@ Let's make a shrinking rectangle
  dc->flags|=DCF_TRANSFORMATION;
  I64 dist=0;
  dc->z=-60;
- for(dist=0;dist!=100;dist++) { 
+ for(dist=0;dist!=100;dist++) {
      Mat4x4TranslationEqu(dc->r,0,0,dist);
      dc->color=LTRED;
      GrRect3(dc,0,0,0,100,100);
@@ -217,24 +238,29 @@ Let's make a shrinking rectangle
      DCFill;
  }
 ```
+
 ## Super Color Dithering
+
 Colors can be combined via dithering via `ROPF_DITHER`. Let's see an example.
+
 ```holyc
  CDC *dc=DCAlias;
  I64 cnt;
- for(cnt=0;cnt!=100;cnt++) { 
+ for(cnt=0;cnt!=100;cnt++) {
      dc->color=LTRED+YELLOW<<16+ROPF_DITHER;
      GrRect3(dc,0,0,0,100,100);
      Refresh;
      DCFill;
  }
 ```
-We can do a sort of 3d shading with `ROPF_PROBABILITY_DITHER`**(it get weird with primitive operations,so use `GrFloodFill`)**  
+
+We can do a sort of 3d shading with `ROPF_PROBABILITY_DITHER`**(it get weird with primitive operations,so use `GrFloodFill`)**
+
 ```holyc
  CDC *dc=DCAlias;
  I64 cnt;
  for(cnt=0;cnt!=100;cnt++) {
-     dc->color=BLACK; 
+     dc->color=BLACK;
      GrRect(dc,0,0,100,100);
      dc->color=LTRED+YELLOW<<16+ROPF_PROBABILITY_DITHER;
      dc->dither_probability_u16=U16_MAX*ToF64(cnt)/100.;
@@ -244,4 +270,5 @@ We can do a sort of 3d shading with `ROPF_PROBABILITY_DITHER`**(it get weird wit
  }
  DCDel(dc);
 ```
+
 ![prob_shad](/img/prob_shad.gif)
