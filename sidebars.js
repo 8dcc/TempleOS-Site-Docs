@@ -14,7 +14,24 @@ const sidebars = {
       },
       items: [
         "guide/installing/methods",
-        "guide/installing/virtualized"
+        "guide/installing/virtualized",
+        "guide/installing/supplementals"
+
+      ],
+    },
+    {
+      type: "category",
+      label: "Getting Started",
+      link: {
+        type: 'generated-index',
+        title: 'Getting Started',
+        description: "Now that we've installed TempleOS, it's time to actually play around with it. In this chapter you'll learn about all the interesting pieces of TempleOS!",
+        slug: '/category/start',
+        keywords: ['guides'],
+      },
+      items: [
+        "guide/getting-started/basics",
+        "guide/getting-started/basic-programs"
 
       ],
     },
