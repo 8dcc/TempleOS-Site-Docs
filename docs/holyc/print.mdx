@@ -4,53 +4,68 @@ title: Printing
 ---
 
 # Printing like a pro
+
 Printing in TempleOS means printing to the screen(not to paper).
 If you want to print a string,just type the string like this:
+
 ```holyc
 "Hello World\n";
 ```
+
 ## Basic formatting
+
 The print routine in TempleOS takes some (or no) arguments,you provide arguments like this:
+
 ```holyc
 "%d,%d,%d\n",1,2,3;
 ```
-The arguments are `1`,`2`, and `3` here and the format code is `d`(Integer decimal). 
-There are various formatting codes for different types of data,to use a floating point number,use *n*
+
+The arguments are `1`,`2`, and `3` here and the format code is `d`(Integer decimal).
+There are various formatting codes for different types of data,to use a floating point number,use _n_
+
 ```holyc
 "Pi is %n\n",3.14;
 
 ```
+
 The basic formatting codes are:
 
-|Code| Meaning |Type |
-|--|--|---|
-|d|Integer|`I64`|
-|S|Define string|`U8*`|
-|C|Uppercase charactor|`U8/U64`|
-|p or P|Pointer to named symbol|Pointer|
-|x or X|Hexidecimal|Pointer/`I64`|
-|D|Date|`CDate`|
-|T|Time|`CDate`|
-|q|Quoted string(turns '"' into escape sequences)|`U8*`|
-|Q|Reverse quoted string|`U8*`|
-|Z|`DefineLst` entry(Takes 2 arguments)|`U8 *` and `I64`| 
-|z|Sub-entry of \0 terminated string(Takes 2 arguments)|`U8 *` and `I64`| 
+| Code   | Meaning                                              | Type             |
+| ------ | ---------------------------------------------------- | ---------------- |
+| d      | Integer                                              | `I64`            |
+| S      | Define string                                        | `U8*`            |
+| C      | Uppercase charactor                                  | `U8/U64`         |
+| p or P | Pointer to named symbol                              | Pointer          |
+| x or X | Hexidecimal                                          | Pointer/`I64`    |
+| D      | Date                                                 | `CDate`          |
+| T      | Time                                                 | `CDate`          |
+| q      | Quoted string(turns '"' into escape sequences)       | `U8*`            |
+| Q      | Reverse quoted string                                | `U8*`            |
+| Z      | `DefineLst` entry(Takes 2 arguments)                 | `U8 *` and `I64` |
+| z      | Sub-entry of \0 terminated string(Takes 2 arguments) | `U8 *` and `I64` |
 
 ## z/Z Formating
+
 `DefineLst`'s are things whose items are separated by `\0`s,they look like this:
+
 ```holyc
 DefineLstLoad("SOME_LIST","a\0b\0c\0");
 ```
+
 We can use the list like this:
+
 ```holyc
  DefineLstLoad("SOME_LIST","a\0b\0c\0");
  I64 i;
  for(i=0;i!=3;i++)
    "HERE:%Z\n",i,"SOME_LIST";
 ```
+
 ## Auxiliary value
+
 The auxiliary value does various things for different format codes.
 For `c`,it repeats the character X times,we can do it like this:
+
 ```holyc
 "c%h3cl\n",'o';
 ```
@@ -75,7 +90,8 @@ We can have the Print routine choose the auxiliary for us using "?".
 ```
 
 This is really cool. We can use an arbitrary value as the auxiliary value using `*`.
+
 ```holyc
  I64 repeat=10;
  "t%h*cn\n",repeat,'e';
- ```
+```
