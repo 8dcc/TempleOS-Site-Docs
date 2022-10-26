@@ -1,0 +1,130 @@
+---
+id: memory
+title: Memory Management
+---
+
+# TempleOS Memory
+
+## Pointers
+
+TempleOS uses a shared memory space between tasks. This means you can access a tasks memory from any other task.
+But before we can do this,we need to know how to access memory(or even what memory is).
+
+Memory looks something like this:
+
+```holyc
+//This is 16kb of memory.
+U8 RAM[65536];
+```
+It looks like a table and you can store or load values from `RAM`.
+
+```holyc
+U8 RAM[65536];
+RAM[0]=1; //Arrays in TempleOS start at 0
+RAM[1]=2;
+RAM[2]=3;
+"RAM[0] is %d\n",RAM[0];
+```
+
+Pointers are the index in RAM a value is.
+
+```holyc
+U8 RAM[65536];
+I64 pointer=356;
+RAM[pointer]=10;
+I64 value=RAM[pointer];
+```
+
+Let's see a real-world example of a pointer
+
+```holyc
+//Use a '*' to make a variable into a pointer
+//Double qoutes make a string in memory
+U8 *pointer="ABCD"; 
+
+"%d(%c)\n",pointer[0],pointer[0];
+"%d(%c)\n",pointer[1],pointer[1];
+"%d(%c)\n",pointer[2],pointer[2];
+"%d(%c)\n",pointer[3],pointer[3];
+"%d\n",pointer[3];
+```
+
+![Pointer](/img/pointer.png)
+
+## Types of memory.
+
+The most important part of RAM is being able to use it,but before we can 
+use it we need to see how it is divided. There are two main types of memory in RAM:
+
+ - Stack
+ - Heap 
+
+### Stack
+
+The easiest one is called the *Heap*. This type of memory comes and goes when it is needed.
+The second type is called the *Stack*. This memory does not come and go,**it is allocated when a 
+function is called and doesn't change it's pointer**. Imagine a tower of blocks. The topmost block 
+is where the current function is called,and the below blocks are where the parent functions are. 
+You cannot remove a block from the bottom or the tower will fall,so we only place/remove blocks 
+from the top
+
+![Stack](/img/stack.png)
+*Note that all local variables in functions are put on the stack.*
+
+### Heap
+
+Heap memory comes from *Random* locations in RAM that aren't reserved for anything.
+It's like a cloud that is full of "random" data. To make some memory from the heap,we 
+use `MAlloc`/`CAlloc` to get request some data from the computer.**And be sure to 
+`Free` the data when you are done with it.**
+
+```holyc
+U8 *heap_ptr=MAlloc(STR_LEN);
+StrCpy(heap_ptr,"I love the heap");
+"Our heap pointer says:%s\n",heap_ptr;
+//Bye Bye
+Free(heap_ptr);
+```
+
+## Getting pointers
+
+All local vairables in a function are allocated on the stack and you can get pointers to them
+To do this,we use the `&` operator,we write into it using the `*` operator.
+Let's see an example:
+```holyc
+U0 Foo() {
+	I64 a=1,b=2,c=3;
+	I64 *i64_ptr=&a; //We get the pointer here
+	"Pointer of a is:%d\n",i64_ptr;
+	//Here we use the '*' operator to write a value into the pointer
+	*i64_ptr=100;
+	"a's new value is :%d\n",a;
+}
+Foo;
+```
+
+## Pointer types.
+
+In TempleOS,each variable has a type. This type also detirmines how big the variable is,
+**AND** it also affects the "width" of the pointer. Let's see an example of how this is used
+
+```holyc
+U0 Foo() {
+	//Each one of these dudes is 8 bytes.
+	//The pointer to an I64 will move 8 bytes each "index"
+	I64 array[3];
+	array[0]=1;
+	array[1]=2;
+	array[2]=3;
+	I64 *ptr=&array;
+	"Look at the values,they increase by 8\n";
+	"ptr+0 is %d\n",ptr+0;
+	"ptr+1 is %d\n",ptr+1;
+	"ptr+2 is %d\n",ptr+2;
+	"\n";
+	"*(ptr+0) is %d\n",*(ptr+0);
+	"*(ptr+1) is %d\n",*(ptr+1);
+	"*(ptr+2) is %d\n",*(ptr+2);
+}
+Foo;
+```

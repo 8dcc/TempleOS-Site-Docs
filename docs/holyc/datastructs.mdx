@@ -19,6 +19,8 @@ CHashDefineStr *d=HashFind("ONION",Fs->hash_table,HTT_DEFINE_STR);
 "%s\n",d->data;
 ```
 
+![Hash table](/img/hashtable.png)
+
 In TempleOS,you can add items to the table,we first need to MAlloc an item first, then fill in the table
 
 ```holyc
@@ -59,7 +61,10 @@ Here is a list of he some of the `HTT` types and what class they use
 
 ## Fifo
 
+
 Fifo means "First In First Out". It is like a _stack_ of papers,the first paper you put in is the first one you get out,**In TempleOS,CFifo's must be aligned to a power of 2.**
+
+![FIFO](/img/fifo.png)
 
 ```holyc
 CFifoI64 *fifo=FifoI64New(0x100);
@@ -118,6 +123,8 @@ while(cur!=head) { //Ends at head
    cur=cur->next;
 }
 ```
+
+![Wrap around](/img/cque_wrap_around.png)
 
 When we create a chain link,we `CAlloc` it to allocation some memory for it. Use`QueInit` to initialize the node .We use `QueIns(new,head->last);` to add it. With that being said,let's see the full example.
 

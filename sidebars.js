@@ -42,8 +42,10 @@ const sidebars = {
     "holyc/intro",
     "holyc/getting-started-hc",
     "holyc/printing",
+    "holyc/memory",
     "holyc/datastructs",
     "holyc/graphics",
+    "holyc/sound",
     "holyc/grpaint",
     "holyc/doldoc"
   ]
