@@ -1,6 +1,7 @@
 ---
 id: Keybinding
 title: Keybinding
+author: xzntrc
 ---
 
 # Keybindings
