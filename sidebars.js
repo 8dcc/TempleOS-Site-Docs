@@ -44,9 +44,10 @@ const sidebars = {
     "holyc/printing",
     "holyc/datastructs",
     "holyc/graphics",
+    "holyc/sound",
     "holyc/grpaint",
     "holyc/doldoc"
   ]
 }
 
-module.exports = sidebars
+module.exports = sidebarsmodule.exports = sidebars
