@@ -27,6 +27,7 @@ const sidebars = {
     "holyc/printing",
     "holyc/datastructs",
     "holyc/graphics",
+    "holyc/sound",
     "holyc/grpaint",
   ]
 }
