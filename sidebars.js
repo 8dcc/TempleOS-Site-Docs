@@ -42,6 +42,7 @@ const sidebars = {
     "holyc/intro",
     "holyc/getting-started-hc",
     "holyc/printing",
+    "holyc/memory",
     "holyc/datastructs",
     "holyc/graphics",
     "holyc/sound",
@@ -50,4 +51,4 @@ const sidebars = {
   ]
 }
 
-module.exports = sidebarsmodule.exports = sidebars
+module.exports = sidebars
