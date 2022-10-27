@@ -16,6 +16,7 @@ Memory looks something like this:
 //This is 16kb of memory.
 U8 RAM[65536];
 ```
+
 It looks like a table and you can store or load values from `RAM`.
 
 ```holyc
@@ -40,7 +41,7 @@ Let's see a real-world example of a pointer
 ```holyc
 //Use a '*' to make a variable into a pointer
 //Double qoutes make a string in memory
-U8 *pointer="ABCD"; 
+U8 *pointer="ABCD";
 
 "%d(%c)\n",pointer[0],pointer[0];
 "%d(%c)\n",pointer[1],pointer[1];
@@ -53,30 +54,32 @@ U8 *pointer="ABCD";
 
 ## Types of memory.
 
-The most important part of RAM is being able to use it,but before we can 
+The most important part of RAM is being able to use it,but before we can
 use it we need to see how it is divided. There are two main types of memory in RAM:
 
- - Stack
- - Heap 
+- Stack
+- Heap
 
 ### Stack
 
-The easiest one is called the *Heap*. This type of memory comes and goes when it is needed.
-The second type is called the *Stack*. This memory does not come and go,**it is allocated when a 
-function is called and doesn't change it's pointer**. Imagine a tower of blocks. The topmost block 
-is where the current function is called,and the below blocks are where the parent functions are. 
-You cannot remove a block from the bottom or the tower will fall,so we only place/remove blocks 
+The easiest one is called the _Heap_. This type of memory comes and goes when it is needed.
+The second type is called the _Stack_. This memory does not come and go,**it is allocated when a
+function is called and doesn't change it's pointer**. Imagine a tower of blocks. The topmost block
+is where the current function is called,and the below blocks are where the parent functions are.
+You cannot remove a block from the bottom or the tower will fall,so we only place/remove blocks
 from the top
 
 ![Stack](/img/stack.png)
-*Note that all local variables in functions are put on the stack.*
+_Note that all local variables in functions are put on the stack._
 
 ### Heap
 
-Heap memory comes from *Random* locations in RAM that aren't reserved for anything.
-It's like a cloud that is full of "random" data. To make some memory from the heap,we 
-use `MAlloc`/`CAlloc` to get request some data from the computer.**And be sure to 
+Heap memory comes from _Random_ locations in RAM that aren't reserved for anything.
+It's like a cloud that is full of "random" data. To make some memory from the heap,we
+use `MAlloc`/`CAlloc` to get request some data from the computer.**And be sure to
 `Free` the data when you are done with it.**
+
+![Heap](/img/heap.png)
 
 ```holyc
 U8 *heap_ptr=MAlloc(STR_LEN);
@@ -91,6 +94,7 @@ Free(heap_ptr);
 All local vairables in a function are allocated on the stack and you can get pointers to them
 To do this,we use the `&` operator,we write into it using the `*` operator.
 Let's see an example:
+
 ```holyc
 U0 Foo() {
 	I64 a=1,b=2,c=3;
