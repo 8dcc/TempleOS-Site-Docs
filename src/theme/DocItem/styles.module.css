@@ -1,0 +1,50 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.docItemContainer header + *,
+.docItemContainer article > *:first-child {
+  margin-top: 0;
+}
+
+@media (min-width: 997px) {
+  .docItemCol {
+    max-width: 75% !important;
+  }
+
+  /* Prevent hydration FOUC, as the mobile TOC needs to be server-rendered */
+  .tocMobile {
+    display: none;
+  }
+}
+
+.authorWrapper {
+  padding: 1rem 2rem;
+}
+
+.authorBox {
+  padding: 1rem 2rem;
+  background: var(--prismBg);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.authorBox > img {
+  height: 4rem; 
+  border-radius: 50%;
+}
+
+.authorBox > div {
+  display: flex;
+  flex-direction: column; 
+  margin-left: 1rem;
+}
+
+.authorName {
+  color: var(--ifm-color-primary);
+  font-weight: "bold" 
+}

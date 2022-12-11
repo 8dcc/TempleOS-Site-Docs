@@ -1,6 +1,7 @@
 ---
 id: supplementals
 title: 🧩 Supplementals
+author: xzntrc
 ---
 
 # Supplementals

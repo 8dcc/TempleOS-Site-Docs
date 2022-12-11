@@ -2,6 +2,7 @@
 id: basic-programs
 title: Programs
 sidebar_position: 1
+author: xzntrc
 ---
 
 # Basic Programs

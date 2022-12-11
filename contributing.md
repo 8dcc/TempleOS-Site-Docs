@@ -29,11 +29,13 @@ Next, you must insert the following lines into the start of your markdown page:
 ---
 id: cli
 title: Command Line
+author: github username
 ---
 ```
 
 - `id` is used to reference the page outside (used soon).
 - `title` is what is seen in the sidebar, if no Heading is used in the document, the heading will result to this.
+- `author` is your github username so the doc page displays your info at the bottom
 
 Finally, you'll need to tell the site where to put this file. Pages are never indexed automatically, this is better to ensure that everything is in the right order, pages appear on the sidebar only if they are referenced in `sidebars.js`, pages will not be able to be found via a URL either unless referenced.
 

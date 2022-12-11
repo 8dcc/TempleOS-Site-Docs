@@ -2,6 +2,7 @@
 id: basics
 title: The Basics
 sidebar_position: 1
+author: xzntrc
 ---
 
 Now we can finally cover all the cool bits and pieces of TempleOS.
