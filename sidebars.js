@@ -49,6 +49,7 @@ const sidebars = {
     "holyc/sound",
     "holyc/doldoc",
     "holyc/input",
+    "holyc/multic",
     "holyc/grpaint",
   ]
 }

@@ -102,28 +102,28 @@ Run;
 Scancodes have a rigid format. Each byte in a scancdoe has a specific purpose.
 The first byte is the most important and can be accessed via `scancode.u8[0]`.
 
-|Byte|Meaning|
-|--|--|
-|0|Scancode (SC_ESC,SC_CURSOR_LEFT)|
-|1 through 3|Flags|
-|4 Repeat of byte 0|
-|5 through 7|Repeat of bytes 1-3|
+| Byte               | Meaning                          |
+| ------------------ | -------------------------------- |
+| 0                  | Scancode (SC_ESC,SC_CURSOR_LEFT) |
+| 1 through 3        | Flags                            |
+| 4 Repeat of byte 0 |
+| 5 through 7        | Repeat of bytes 1-3              |
 
 The flags are plentiful and contain a bitmask. You can test for a flag by
 bitwise ANDing with the scancode to test the bit is set(no need to `use scancode.u8[xxx]`)
 
-|Flag| Meaning|
-|--|---|
-|SCF_KEY_UP|The key is being released|
-|SCF_SHIFT|The shift key is down.|
-|SCFCTRL|The control key is down.|
-|SCF_ALT|The alt key is down.|
-|SCF_CAPS|The caps key is active.|
-|SCF_NUM|The numlock key is active.|
-|SCF_SCROLL|The scrolllock key is active.|
-|SCF_MS_L_DOWN|Mouse left button is down.|
-|SCF_MS_R_DOWN|Mouse left button is down.|
-|SCF_NO_SHIFT|Shift is not active.|
+| Flag          | Meaning                       |
+| ------------- | ----------------------------- |
+| SCF_KEY_UP    | The key is being released     |
+| SCF_SHIFT     | The shift key is down.        |
+| SCFCTRL       | The control key is down.      |
+| SCF_ALT       | The alt key is down.          |
+| SCF_CAPS      | The caps key is active.       |
+| SCF_NUM       | The numlock key is active.    |
+| SCF_SCROLL    | The scrolllock key is active. |
+| SCF_MS_L_DOWN | Mouse left button is down.    |
+| SCF_MS_R_DOWN | Mouse left button is down.    |
+| SCF_NO_SHIFT  | Shift is not active.          |
 
 # Keyboard Input(3)Multiple keys at once
 
