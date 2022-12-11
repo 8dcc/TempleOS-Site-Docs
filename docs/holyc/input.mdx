@@ -2,15 +2,19 @@
 id: input
 title: User Input
 ---
+
 # Input
-One of the  most important parts of using an operating system is being able
+
+One of the most important parts of using an operating system is being able
 to interact with it. TempleOS lets you access the mouse and keyboard. So let's
 get started!
 
 # Mouse Input
+
 In TempleOS events are typeically accessed via the messaging mechanism. We can get the mouse
-coordnates by the `GetMsg` function while looking for `MSG_MS_MOVE`. You can check for 
-a mouse click via `MSG_MS_R_DOWN` or `MSG_MS_R_DOWN`. 
+coordnates by the `GetMsg` function while looking for `MSG_MS_MOVE`. You can check for
+a mouse click via `MSG_MS_R_DOWN` or `MSG_MS_R_DOWN`.
+
 ```holyc
 I64 x,y;
 U0 DrawIt(CTask *t,CDC *dc) {
@@ -34,21 +38,25 @@ U0 Run() {
 }
 Run;
 ```
+
 # Keyboard Input(1)
+
 You can get keys much like mouse events in TempleOS using `GetMsg`. But before
 we dive into this we need to know how keys are transmitted. There are
- - Charactors(letters/numbers/etc) and
- - Scancodes(the raw keycode with modifier keys like Ctrl/Alt)
+
+- Charactors(letters/numbers/etc) and
+- Scancodes(the raw keycode with modifier keys like Ctrl/Alt)
 
 A charactor is typically what can get displayed on the screen,but scancodes are
 the juicy stuff. If you press `A`, the charactor will be `'A'`,but the scancode will
-be the raw key code in the `.u8` from your keyboard AND some flags.(You can turn a charactor into a 
+be the raw key code in the `.u8` from your keyboard AND some flags.(You can turn a charactor into a
 scancode via `Char2ScanCode('A');`)
 
 The flags here will tell you if you were holding down ALT,CTRL,SHIFT or other
 fun buttons while you pressed. You can check for these flags with the `&` operator.
 
 A simple example looks like this
+
 ```holyc
 I64 x,y;
 I64 color=GREEN;
@@ -88,18 +96,22 @@ U0 Run() {
 }
 Run;
 ```
+
 # Keyboard Input(2) Scancode Galore
+
 Scancodes have a rigid format. Each byte in a scancdoe has a specific purpose.
 The first byte is the most important and can be accessed via `scancode.u8[0]`.
+
 |Byte|Meaning|
 |--|--|
 |0|Scancode (SC_ESC,SC_CURSOR_LEFT)|
-|1through 3|Flags|
+|1 through 3|Flags|
 |4 Repeat of byte 0|
 |5 through 7|Repeat of bytes 1-3|
 
-The flags are plentiful and contain a bitmask. You can test for a flag by 
+The flags are plentiful and contain a bitmask. You can test for a flag by
 bitwise ANDing with the scancode to test the bit is set(no need to `use scancode.u8[xxx]`)
+
 |Flag| Meaning|
 |--|---|
 |SCF_KEY_UP|The key is being released|
@@ -112,16 +124,18 @@ bitwise ANDing with the scancode to test the bit is set(no need to `use scancode
 |SCF_MS_L_DOWN|Mouse left button is down.|
 |SCF_MS_R_DOWN|Mouse left button is down.|
 |SCF_NO_SHIFT|Shift is not active.|
+
 # Keyboard Input(3)Multiple keys at once
-Sometimes you want to check if multiple keys are down at once. Luckily for 
-you TempleOS keeps a record of all down keys. It is a *bitfield* called `kbd.down_bitmap`.
-Each scancode is a bit and can tested via `Bt(kbd.down_bitmap,scancode)`...  Example time:
+
+Sometimes you want to check if multiple keys are down at once. Luckily for
+you TempleOS keeps a record of all down keys. It is a _bitfield_ called `kbd.down_bitmap`.
+Each scancode is a bit and can tested via `Bt(kbd.down_bitmap,scancode)`... Example time:
 
 ```holyc
 I64 x,y;
 U0 DrawIt(CTask*,CDC*dc) {
   dc->color=GREEN;
-  GrRect(dc,x,y,100,100); 
+  GrRect(dc,x,y,100,100);
 }
 U0 Run() {
   Fs->draw_it=&DrawIt;
