@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunktempleos_simplified=self.webpackChunktempleos_simplified||[]).push([[336],{5745:e=>{e.exports=JSON.parse('{"plugin":{"name":"docusaurus-plugin-content-pages","id":"default"}}')}}]);
