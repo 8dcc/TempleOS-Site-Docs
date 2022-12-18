@@ -1,0 +1,210 @@
+---
+id: multic
+title: Multi-Threading
+---
+# Multi-Threading 
+## Introduction
+In TempleOS,you can spawn multiple task's. These are called thread's in other
+operating systems. Each CPU core has it's own Task(only 1 task runs on each 
+core at once). Because of this, **you must `Yield` to tell TempleOS to go 
+to the next task**. If you don't `Yield`(or use it's friends) you will freeze,but don't worry,you can tell TempleOS to wake up by pressing `Ctrl+Alt+C`. This will send a `Break` exception to the current `CTask`(unless `BreakLock(TRUE)`) was called. Enough talk,let's example it out 
+```holyc
+U0 FunTask(
+	//MUST TAKE A SINGLE ARGUMENT
+	I64 dummy
+) {
+  //Decrease dummy by 1 each time,until lesser than 0
+  while(--dummy>=0)
+    Play("EGBDF#");
+}
+CTask *task=Spawn(
+  &FunTask, //& get's the address of FunTask
+  2, //Argument to function
+  "Task Name",
+);
+//Wait for task to be born
+BirthWait(&task);
+"BORN... WAITING FOR EXIT\n";
+//Wait for it to be done
+DeathWait(&task);
+"task DIED\n";
+```
+
+We have lot's to unpack here. `Spawn` Queues a new `CTask` in on a core. `BirthWait(CTask **)` waits for a `CTask` to be born,and `DeathWait(CTask **)` waits for a `CTask` to finish.
+
+|Function| Purpose |
+|--|--|
+|Spawn(fun_ptr,argument,name,target_cpu,parent)| Spawn a task that runs `fun_ptr` on `target_cpu`|
+|BirthWait(CTask **)|Takes a pointer to a `CTask*`,waits for a `CTask*` to be born.|
+|DeathWait(CTask **)|Wait's for a `CTask` to return or `Exit`.|
+
+## Yielding
+Let's say you have a task that uses much CPU. You need to `Yield` to give up control for a bit . Let's do an 2 expensive operations (one with  `Yield` and one without).
+```holyc
+
+//
+// DocPut get's the document of the current task (which 
+// is what you see on the screen right now).
+//
+CDoc *print_to=DocPut; 
+I64 ExpensiveNoYield(I64 fib) {
+  if(fib<2) return fib;
+  return ExpensiveNoYield(fib-1)+
+	 ExpensiveNoYield(fib-2);
+}
+U0 RunnerNoYield(I64 value) {
+  F64 start=tS;
+  DocPrint(print_to,"FIB(%d)==%d\n",value,ExpensiveNoYield(value));
+  DocPrint(print_to,"It took  %n seconds\n",tS-start);
+}
+I64 ExpensiveYield(I64 fib) {
+  static I64 cnt;
+  //Yield every 100 calls
+  cnt++;
+  if(cnt>100) {
+    Yield;
+    cnt=0;
+  }
+
+
+  if(fib<2) {
+    return fib;
+  }
+  return ExpensiveYield(fib-1)+
+	 ExpensiveYield(fib-2);
+}
+U0 RunnerYield(I64 value) {
+  F64 start=tS;
+  DocPrint(print_to,"FIB(%d)==%d\n",value,ExpensiveYield(value));
+  DocPrint(print_to,"It took  %n seconds\n",tS-start);
+}
+"Expensive without Yield'ing\n";
+CTask *ny=Spawn(&RunnerNoYield,40);
+DeathWait(&ny);
+"Expensive with Yield'ing\n";
+CTask *y=Spawn(&RunnerYield,40);
+DeathWait(&y);
+```
+
+![Yielding time results](/img/yield_time.png)
+
+As you can see,Not-`Yield`ing will "freeze" the CPU for a bit,but `Yield`ing. `Yield` will let the CPU  do other tasks for a bit hence it takes a bit more time.
+## Killing Tasks and Cleanup
+You can kill a task in TempleOS via `Kill`. You may want have the killed task do some cleanup. TempleOS gives us a `task_end_cb` which is run when a task is about to die. In  the following example,the `AnnoyingSong` task will be stop playing the sound when it is killed when `SndTaskEndCB` is called at the end
+```holyc
+U0 AnnoyingSong(I64 dummy) {
+//This is called on Exit or otherwise dies
+  Fs->task_end_cb=&SndTaskEndCB;
+  while(TRUE) {
+    Play("EGGE#GG#");
+  }
+}
+CTask *t=Spawn(&AnnoyingSong);
+//Sleep for 3000 milliseconds
+Sleep(3000);
+"KILLING t\n";
+Kill(t);
+"FINALLY\n";
+```
+You can make your own `task_end_cb` like this
+```holyc
+U0 EndCb() {
+  Snd; //Turn off sound
+  Exit; //Exit the task
+}
+U0 AnnoyingSong(I64 dummy) {
+//This is called on Exit or otherwise dies
+  Fs->task_end_cb=&EndCb;
+  while(TRUE) {
+    Play("EGGE#GG#");
+  }
+}
+CTask *t=Spawn(&AnnoyingSong);
+//Sleep for 3000 milliseconds
+Sleep(3000);
+"KILLING t\n";
+Kill(t);
+"FINALLY\n";
+```
+## Spin-Locks and Sharing Data across Cores
+In TempleOS,you are only limited by your imagination(and your number of cores). You can get the core count with `mp_cnt`,and the current core number with `Gs->num`. When you use multiple cores,**you must be careful to make sure each core has a lock on the data because something called a race condition may happen**. A race condition is when 2 or more cores try to access the same stuff at once. Imagine lots of people trying to access a vending machine at once,the vending machine wouldn't know who gets what.
+
+To resolve the vending machine issue we use a lock(a spin-lock to be exact). A spin lock will spin until everyone is done with it or no one is using it. At the same time,**LBts will set the bit and return the old value in one instruction so there is no race condition**. This will set the bit telling other people that the vending machine is being used and that they have to wait. Perhaps an example will help:
+```holyc
+//
+// We set bit 0 of spin_lock to tell the
+// cores that some_string is being used. 
+// This way the cores who OWN's some_string
+//
+// If we didn't do this another core could modify
+// some_string's data and things could messy
+//
+I64 spin_lock=0;
+U8 *some_string=NULL;
+CDoc *doc=DocPut;
+
+I64 done_flags=0;
+U0 PrintName(I64) {
+//
+// We set bit 0 to tell the cores we are locked
+// We reset bit 0 to tell to tell the core the spin_lock is availble
+//
+
+//Lock set bit 0,returns old value
+  while(LBts(&spin_lock,0))
+    Yield;
+
+//
+// Gs->num has the current core number
+//
+  some_string=MStrPrint("I am from core %d",Gs->num);
+  DocPrint(doc,"%s\n",some_string);
+//Set the done
+  LBts(&spin_lock,Gs->num); //Gs->num is core number
+//Locked reset bit 0
+  LBtr(&spin_lock,0);
+}
+
+//
+// mp_cnt is the Number of cores in your system
+//
+I64 core;
+for(core=0;core!=mp_cnt;core++) {
+  Spawn(&PrintName,NULL,"PrintName",core);
+}
+//Wait for all done_flags  to be set
+for(core=0;core!=mp_cnt;core++) {
+  if(!Bt(&done_flags,core))
+    Yield;
+}
+"ALL-DONE\n";
+```
+Here we locked `&spin_lock` by **atomically** using `LBts(ptr,bit)`. This means the computer will automatically acquire the ptr and set and return the bit's value in 1 instruction. This is useful as we can check and acquire lock at once. We also use `LBts` to set `Gs->num` in `done_flags`,which will check to see when all the cores are finished. We `Yield` while `LBts` returns 1(The bit is set after the internal check for if it is previously 0)
+
+## Task Communication
+These is a special kind of task which runs `SrvTaskCont` (which you create using `Spawn`). This task will run jobs for you which you can send via `TaskExe(server,parent,text,flags)`. When the job completes you can get the result via `JobResGet(CJob *)`.  Here is an example:
+```holyc
+CTask *server=Spawn(&SrvTaskCont);
+//Final statement is 1+3,so result will be 4
+CJob *job=TaskExe(server,Fs,"Beep;1+3;",0);
+"Result is %d\n",JobResGet(job);
+Kill(server);
+```
+If you just want to run a job and have it complete,there is a flag to suspend the master and then un-freeze it when the job completes . 
+```holyc
+CTask *server=Spawn(&SrvTaskCont);
+//This job will freeze the current task(Fs) and will unfreeze it after the Beep.
+CJob *job=TaskExe(server,Fs,"Beep;",1<<JOBf_WAKE_MASTER);
+Kill(server);
+Exit;
+```
+### Talking to Yourself
+`Fs` is a function that returns the current task,and you can use it to make the task send input to itself(You can do this via `XTalk(Fs,fmt,...);`)
+```holyc
+XTalk(Fs,"I got input!!!");
+```
+You can even talk to other user Terminals spawned by `User`;
+```holyc
+CTask *t=User;
+XTalk(t,"1+2;\n");
+```

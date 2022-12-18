@@ -1,0 +1,436 @@
+---
+id: primer
+title: HolyC Primer
+---
+
+# HolyC Primer.
+
+HolyC is a relativly simple language,but like all langauges you will have to
+get started with it. The most simple thing you can do is write text to the screen.
+This can be done by typing a string.
+
+```holyc
+"I like TempleOS!!!\n"; //A string is a sequence of letters/charactors
+```
+
+Computers are capable of much more the writing text to the screen,they can also
+add numbers and stuff,let's take a look:
+
+```holyc
+I64 a=1; //'a' and 'b' are variables
+I64 b=2;
+"1+2 is %d\n",a+b;
+```
+
+Here we added variables,which brings us to our next section..
+
+## Variables
+
+Computers can store values,and In TempleOS they are typically stored in _variables_.
+All variables in TempleOS have a type(which typically comes before the variable name).
+Let's see some various types:
+
+```holyc
+U8 charactor;
+I32 int_32bit;
+I64 int_64bit;
+//Unsigned dont have a sign bit so you can store extra large values
+U64 unsigned_64bit;
+```
+
+As you can see,each type has a specific size. This detirmines how big the value you can
+hold is. But what do we do with variables. We can write values into them.
+
+```holyc
+I64 a;
+a=10;
+"a has %d\n",a;
+```
+
+We can even add them togheter,or divide them and whatnot
+
+```holyc
+I64 a=1,b=2,c; //You can put multiple variables into 1 line with commas
+c=a*10+b;
+"a*10+b is %d\n",c;
+```
+
+## Types
+
+### Floating points
+
+Each type has a certian thing it's good at. Most of the primitive types are
+integers,which dont have a decimal point. The opposite of this is a floating point(`F64`)
+Let's see it in action
+
+```holyc
+F64 flt=3;
+I64 integer=3;
+flt/=2;
+integer/=2;
+"flt is %n\n",flt; //USE %n WITHS F64's
+"int is %d\n",integer;
+```
+
+### Integers
+
+As you can see,an integer has no decimal point,which means when you divide the decimal point
+is removed,but each integer type has a size(in bits). An 8bit signed integer(`I8`) can hold
+up to 127,and a 16bit signed integer (`I16`) can hold up to 32767.
+
+Let's see the minumum/maximum values for signed integers.
+
+| Type  | Min                  | Max                 |
+| ----- | -------------------- | ------------------- |
+| `I8`  | -128                 | 127                 |
+| `I16` | -32768               | 32767               |
+| `I32` | -2147483648          | 2147483647          |
+| `I64` | -9223372036854775808 | 9223372036854775807 |
+
+Unsigned variables do not have a negative sign,but they can represent bigger positive
+numbers.
+
+| Type  | Min | Max                  |
+| ----- | --- | -------------------- |
+| `U8`  | 0   | 255                  |
+| `U16` | 0   | 65535                |
+| `U32` | 0   | 4294967295           |
+| `U64` | 0   | 18446744073709551615 |
+
+### Custom Types
+
+Sometimes you want to make custom types to represent your data. Let's say you want a
+rectangle,you could do this.
+
+```holyc
+class CRectangle {
+	I64 x,y;
+	I64 width,height;
+};
+CRectangle rect;
+rect.x=200;
+rect.y=300;
+rect.width=100;
+rect.height=100;
+
+gr.dc->color=RED;
+GrRect(gr.dc,rect.x,rect.y,rect.width,rect.height);
+Sleep(1000);;
+DCFill(gr.dc,TRANSPARENT);
+```
+
+You can also have _inheritance_ of types. A type can inherit all of the
+properties of a base type like this:
+
+```holyc
+class CPoint {
+	I64 x,y;
+};
+class CCircle:CPoint { //Look here
+	I64 radius;
+};
+CCircle circ;
+circ.x=350;
+circ.y=250;
+circ.radius=100;
+gr.dc->color=RED;
+GrFillCircle(gr.dc,circ.x,circ.y,0,circ.radius*2);
+Sleep(1000);
+DCFill(gr.dc,TRANSPARENT);
+```
+
+![inher](/img/inher.png)
+_The inherited class starts at the start of the new classes's memory_
+
+Sometimes you want to save memory. You can do this via `union`s . These store data at same location in memory. This means if you are only using 1 member at once,you can save space.
+
+If you have a `CGeneric` class that has a type and a value,we could do this.
+
+```holyc
+#define GEN_INT 1
+#define GEN_FLT 2
+
+class CGeneric {
+  I64 type;
+  union {
+    F64 flt;
+    I64 int;
+  };
+};
+
+CGeneric f,i;
+f.type=GEN_FLT;
+f.flt=3.14;
+
+if(f.type==GEN_FLT)
+  "%n\n",f.flt;
+else if(f.type==GEN_INT)
+  "%d\n",f.flt;
+
+
+i.type=GEN_INT;
+i.int=10;
+
+if(i.type==GEN_FLT)
+  "%n\n",i.flt;
+else if(i.type==GEN_INT)
+  "%d\n",i.flt;
+```
+
+## Branching
+
+Computers are great at making decisions based on variables,we can do this via various branch statements,which the most basic of them is `if`,let's see it
+
+### If Statements
+
+If statements are the most basic of branch statements. They take 1 argument. It will test if the value is not 0,and `if` it isn't 0.
+
+```holyc
+I64 x=10;
+if(x) {
+  "x is not FALSE\n";
+}
+x=0;
+if(x) {
+  "x is not FALSE\n";
+}
+```
+
+You can test if a value is false via an `else` statement
+
+```holyc
+I64 x=10;
+if(x) {
+  "x is not FALSE\n";
+} else {
+  "x is FALSE\n";
+}
+x=0;
+if(x) {
+  "x is not FALSE\n";
+} else {
+  "x is FALSE\n";
+}
+```
+
+Oh,and there is also an operator `!` that will turn a `TRUE` into a `FALSE`,and a `FALSE` into a `TRUE`. It's called the logical not operator
+
+```holyc
+I64 x=10;
+if(!x) {
+  "!x is TRUE\n";
+} else {
+  "!x is FALSE\n";
+}
+x=0;
+if(!x) {
+  "!x is TRUE\n";
+} else {
+  "!x is FALSE\n";
+}
+```
+
+### While Statements
+
+Sometimes we want to loop,sometimes we want a countdown. We can do this by looping
+
+```holyc
+I64 i=10;
+while(i) {
+  "COUNTDOWN:%d\n",i;
+  i=i-1;
+}
+"BLAST-OFF\n";
+```
+
+While is like an if statement,but it repeats if the condition is true.
+If you want to exit a loop without going to the start,we can use the `break` statement
+
+```holyc
+I64 i=10;
+while(TRUE) {
+  "COUNTDOWN:%d\n",i;
+  i=i-1;
+  if(i==0) {
+    "Breaking now\n";
+    break;
+  }
+}
+"BLAST-OFF\n";
+```
+
+### Do Statements
+
+Do statements are like for statements but they do the looping-check at the end. This way you can run your code _then_ check if we need to run again
+
+```holyc
+Bool should_continue=TRUE;
+do {
+  //Do something
+  "I will not continue\n";
+  should_continue=FALSE;
+} while(should_continue);
+```
+
+### For Statements
+
+For statements are cool,they have 3 parts that are separated by semi-colons
+
+- The start
+- The condition
+- The end part
+
+The first part here is `x=1`,the second part is the condition,and the end part(`x=x+1`) is run at the end of each cycle
+
+```holyc
+I64 x;
+//!= means does not equal
+for(x=1;x!=10;x=x+1) {
+  "Countup %d\n",x;
+}
+```
+
+### Switch Statements(1)
+
+Let's say you have code to turn a number into a word,you could do this with if statements
+
+```holyc
+U8 *NumToStr(I64 num) {
+  if(num==0)
+    return "ZERO";
+  else if(num==1)
+    return "ONE";
+  else if(num==2)
+    return "TWO";
+  else if(num==3)
+    return "THREE";
+  else if(num==4)
+    return "FOUR";
+  return NULL;
+}
+I64 num;
+for(num=0;num<=4;num++)
+  "%d is %s\n",num,NumToStr(num);
+```
+
+This could get really big if we have tons off values,luckily for us TempleOS has us covered with switch statements.
+
+Switch statements are like if-statements and goto statements combines. A switch statement will jump to a `case` from the condition value,or **if nothing is found you can jump to a optinal default label**. Oh,and **be sure to exit the switch statement using a `break` statement.** It looks like this:
+
+```holyc
+U8 *NumToStr(I64 num) {
+  U8 *ret;
+  switch(num) {
+    case 0: ret="ZERO"; break;
+    case 1: ret="ONE"; break;
+    case 2: ret="TWO"; break;
+    case 3: ret="THREE"; break;
+    case 4: ret="FOUR"; break;
+    //This condition is run if no match is found
+    default: return NULL;
+  }
+  return ret;
+}
+I64 num;
+for(num=0;num<=4;num++)
+  "%d is %s\n",num,NumToStr(num);
+```
+
+### Switch Statements(2)
+
+Sometimes you have code that you want to run before a case(and maybe you want to run the same code before another case). We can you a feature unique to TempleOS called sub-switches. You can put your start code after a `start:` label,and you put end code after a `end:` label. Let's see a canonical example from TempleOS:
+
+```holyc
+U0 Main() {
+  I64 i;
+  for (i=0;i<10;i++)
+    switch (i) {
+      case 0:
+        "Zero ";
+        break;
+      case 2: "Two ";
+        break;
+      case 4: "Four ";
+        break;
+      start:
+        "[";
+        case 1: "One";
+	  break;
+        case 3: "Three";
+	  break;
+        case 5: "Five";
+	  break;
+      end:
+        "] ";
+        break;
+    }
+}
+Main;
+```
+
+In the above example ,we run `"[";` to display a _[_ before the number and in the `end:` block we run `"]";`. to display a _]_.
+
+### Switch Statements(3) The final chapter
+
+**Switch statements are always jump tables,so don't make tables that are too gaint.** Switch statements come in 2 types. Bounded and un-bounded. **If you know for a fact that your condition will be within a certian range,you can skip the range check for a slight speed gain** Unbounded switch statements use `switch []` instead of `switch()`. I don't know why you would need this and it is a great source of bugs.
+
+```holyc
+U8 *NumToStr4(I64 num) {
+  U8 *ret;
+  switch[num] {
+    case 0: ret="ZERO"; break;
+    case 1: ret="ONE"; break;
+    case 2: ret="TWO"; break;
+    case 3: ret="THREE"; break;
+    case 4: ret="FOUR"; break;
+  }
+  return ret;
+}
+I64 num;
+//DO NOT EXCEEDE 4 OR BAD THINGS WILL HAPPEN
+for(num=0;num<=4;num++)
+  "%d is %s\n",num,NumToStr4(num);
+```
+
+## Functions
+
+Sometimes you have a common piece of code you want to run over and over again(possibly with different variables). Nearly everything in TempleOS is done this way with _functions_.
+
+You can make a function like this:
+
+```holyc
+
+I64 Add3(
+//Takes 3 arguments
+	I64 a,
+	I64 b,
+	I64 c
+) {
+  //Put your function code in here
+  return a+b+c;
+}
+//You call the function with parenthesis
+"1+2+3==%d\n",Add3(1,2,3);
+```
+
+### Default Arguments
+
+TempleOS let's you assign default values to your arguments. **THESE VALUES ARE COMPUTED AT COMPILE TIME AND DO NOT CHANGE.**,Oh and an example of a default argument in action.
+
+```holyc
+I64 Add3(I64 a=1,I64 b=2,I64 c=3) {
+  return a+b+c;
+}
+"100+2+300==%d\n",Add3(100,,300);
+```
+
+### Calling without Arguments
+
+If all the values have default arguments,you can call the function without parenthesis!!!\*\*
+
+```holyc
+I64 Add3(I64 a=1,I64 b=2,I64 c=3) {
+  return a+b+c;
+}
+"1+2+3==%d\n",Add3; //Same as Add3(1,2,3);
+```

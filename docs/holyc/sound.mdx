@@ -4,21 +4,26 @@ title: Sound
 ---
 
 # Sound
+
 TempleOS makes sounds(no no it's true).  
 Lets get started using an ONA(which is not a frequency in hertz,use `Freq2Ona(hz)`). Let's get started.
+
 ```holyc
 I64 o;
 for(o=60;o!=100;o++) {
 	Snd(o);
 	Sleep(33);
-} 
+}
 Snd; //Turn off sound
 ```
+
 This is fun and all,but what about music. For that we typically use `Play`.
 Here is an example scale:
+
 ```holyc
 Play("wChDqEeFwGwAwB");
 ```
+
 The notes of a music scale start with C through G,then A and B go on top.  
 What are the letters before the notes,they are note-lengths.
 |Letter|Meaning|
@@ -29,9 +34,12 @@ What are the letters before the notes,they are note-lengths.
 |e|Eighth|
 |t|2/3rds or current duration|
 |.|1.5 times the current duration|
-You can make a *sharp* note with `#`.
-## Tempo and Staccato 
+You can make a _sharp_ note with `#`.
+
+## Tempo and Staccato
+
 The tempo(speed) of the music can be set with `music.tempo`
+
 ```holyc
  music.tempo=8;
  Play(
@@ -46,7 +54,9 @@ The tempo(speed) of the music can be set with `music.tempo`
      "hGhF#hFhD#wEqG#qAhCqAhChDwD#wDwC"
  );
 ```
-Staccato is the spacing between the notes,it can be set via `music.stacatto_factor` . It ranges from 0.0 to 1.0 
+
+Staccato is the spacing between the notes,it can be set via `music.stacatto_factor` . It ranges from 0.0 to 1.0
+
 ```holyc
 F64 s=0.1;
 for(;s<=1.0;s+=0.25) {
@@ -56,20 +66,31 @@ for(;s<=1.0;s+=0.25) {
 ```
 
 ## Sound Effects
+
 TempleOS makes it easy to make sound effects for your games. There are 3 main ways to make a sound effect. The most primitive of them is to use `Snd(ona);`(which makes a constant frequency come from your speaker),but that isn't as fun as the next two. The first one is...
+
 ### Noise
+
 A noise will make a random some that bounces from `min` to `max` ona's for a certain amount of milliseconds. It sounds pretty epic.
+
 ```holyc
 Noise(500,1,100); //Make a noise for 500 milliseconds between 1 and 100 ona's
 ```
+
 If you want a cleaner sound,use ...
+
 ### Sweep
-This makes a *swooping* sound. It is more like a fine wine whereas `Noise` is more like beer.
+
+This makes a _swooping_ sound. It is more like a fine wine whereas `Noise` is more like beer.
+
 ```holyc
 Sweep(500,10,100); //Make a smooth noise for 500 milliseconds between 10 and 100 ona's
 ```
+
 ## Sound Tasks
+
 A task can have a sound task that plays music or whatnot. It is located in `Fs->song_task`. This allows you to do other stuff while you jam out. To get started,make a task function(and be sure to use `MusicSettingsRst` to reset the music settings).
+
 ```holyc
 U0 SongTask(I64)
 {
@@ -84,12 +105,16 @@ U0 SongTask(I64)
   }
 }
 ```
+
 Then we spawn it.
+
 ```holyc
 Fs->song_task=Spawn(&SongTask,,,,Fs); //Fs is current Task,we want the current CTask to be the parent task
 ```
-Be sure to kill the sound task when done with it,Also **you can kill the task automatically via Pushing/Poping the  settings via `SettingsPush`/`SettingsPop`**. This is the "offical" method.
+
+Be sure to kill the sound task when done with it,Also **you can kill the task automatically via Pushing/Poping the settings via `SettingsPush`/`SettingsPop`**. This is the "offical" method.
 So for the full example.
+
 ```holyc
 SettingsPush;
 U0 SongTask(I64)
