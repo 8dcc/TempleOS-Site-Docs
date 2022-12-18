@@ -35,7 +35,21 @@ const sidebars = {
 
       ],
     },
-    "Keybinding"
+    {
+      type: "category",
+      label: "Tweaks / Tricks",
+      link: {
+        type: 'generated-index',
+        title: 'Tweaks / Tricks',
+        description: "Now that we have an understanding of the operating system, lets learn how we can tweak it!",
+        slug: '/category/tweaks',
+        keywords: ['guides'],
+      },
+      items: [
+        "guide/tweaks/ui"
+      ],
+    },
+    "Keybinding",
 
   ],
   holyc: [

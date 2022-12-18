@@ -15,6 +15,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@cmfcmf/docusaurus-search-local": "^0.11.0",
     "@docusaurus/core": "2.0.0-beta.18",
     "@docusaurus/preset-classic": "2.0.0-beta.18",
     "@mdx-js/react": "^1.6.22",
@@ -36,7 +37,10 @@
     ]
   },
   "devDependencies": {
+    "@docusaurus/module-type-aliases": "^2.2.0",
+    "@tsconfig/docusaurus": "^1.0.6",
+    "husky": "^8.0.0",
     "prettier": "^2.7.1",
-    "husky": "^8.0.0"
+    "typescript": "^4.9.3"
   }
 }

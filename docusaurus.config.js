@@ -3,6 +3,8 @@ const holyc = require('./src/theme/holyc.js');
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
+  plugins: [require.resolve("@cmfcmf/docusaurus-search-local")],
+  
   title: "TempleOS Simplified",
   tagline: "Providing simple TempleOS documentation.",
   url: "https://templeos.me",
