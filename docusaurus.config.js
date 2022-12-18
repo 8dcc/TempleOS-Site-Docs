@@ -68,6 +68,13 @@ module.exports = {
           position: "left",
           sidebarId: 'config'
         },
+        {
+          to: "Team",
+          label: "Team",
+          position: "left",
+          sidebarId: 'config'
+        },
+        
 
 
 
@@ -174,7 +181,7 @@ module.exports = {
       ],
 
 
-      copyright: `Creative Commons Attribution 4.0 International © ${new Date().getFullYear()} | Xzntrc`,
+      copyright: `Creative Commons Attribution 4.0 International © ${new Date().getFullYear()} | TempleOS Simplified Team`,
 
 
     },
