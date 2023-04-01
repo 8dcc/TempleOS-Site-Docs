@@ -1,7 +1,7 @@
 # Contributing
 
 > **Note** <br>
-> A basic understanding of [React](https://reactjs.org/) and [Markdown](https://https://www.markdownguide.org/) may be nesseciary for editing _some_ features of the site.
+> A basic understanding of [React](https://reactjs.org/) and [Markdown](https://www.markdownguide.org/) may be nesseciary for editing _some_ features of the site.
 
 ## Editing
 
